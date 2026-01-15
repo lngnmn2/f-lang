@@ -35,6 +35,9 @@ For example, a &ldquo;central&rdquo;, every-day, (every-minute!) notion, capture
 
 This is what mathematicians means when they say that the [formal] written language of mathematics has to be unambiguous &#x2013; one not just have to define the terms before using them, but also define how properly use (which particular overload) of `AND` and `OR` (one has to explicitly chose &ldquo;inclusive&rdquo; vs. &ldquo;exclusive&rdquo; overload) .
 
+Even the individual symbols in some mathematical notions are overloaded (re-used). In particular in the classic set-comprehension notation the uniersal notion of _such that_ is denoted as **|**, while this is nothing but confusing.
+
+We shall have the distinct keyword `suchThat` (inspired by `andAlso` and `orElse`, which we also shall use) for predicate logic, `where` for nested bindings and `with` for the _set-union_ operation at the level of abstract interfaces in *traits*. We explicitly avoid the term "class" for subtle aesthetic reasons.
 
 <a id="orgd9e85c2"></a>
 
