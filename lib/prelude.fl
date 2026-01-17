@@ -20,7 +20,7 @@ type Ordering =
 trait Eq a where
     equals : a, a -> Bool
 
-trait Ord a where
+trait Ord a suchThat a <: Eq a where
     compare : a, a -> Ordering
 
 -- 3. The Numeric Trinity
@@ -35,7 +35,7 @@ trait Num a where
 trait Functor f where
     map : (a -> b), f a -> f b
 
-trait Monad m where
+trait Monad m suchThat m <: Functor m where
     pure : a -> m a
     bind : m a, (a -> m b) -> m b
 

@@ -74,6 +74,7 @@ We desugar ADTS to just there Universal Types.
 - Trait Bounds are just type-level Equations (Equational Reasoning)
 
 ## Disambibuation
+- Trait bounds has to be specified *before* the where clause, simply because mathematical constraints comes prior to code.
 - We say `suchThat` when what follows are mathematical equations -- statements of truth. **Logical Constraints** (required predicares), complex **Trait-Bound** (mathematical equations).
 - In general, we use `suchThat` when we write mathematics (equational reasoning), and we use `where` when we write the code (binding in the Environemnt).
 - At the **Type-Level** we naturally use `suchThat`
