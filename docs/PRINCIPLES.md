@@ -18,17 +18,25 @@ We desugar ADTS to just there Universal Types.
 - `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
 - Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
 
+### The arrow
+- In mathematics the `->` arrows used to denote an anonymous *mapping*, i.e. `x -> x + 1` with a well-defined meaning "x maps to".
+- `->` traditionally stands for *maps to*, so its use *ONLY* in the Curried Functions type-signatures is justified.
+- The classic Haskell use of the arrow `->` in the Lambda Notation -- `\x -> \y -> x + y` is the only way to denote Currying properly.
+- It is also used with individual Clauses in pattern-matching expressions, which semantically is exactly an anonymous mapping.
+
+These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the Type-level, and two uses at the level of Code.
+
 ### Direction
 - A direction of a DAG is not arbitrary and cannot be reversed on a whim, just because that would be a structural "dual".
 - Direction "Naturally" arise from the flow of implications (connecting every single step). Implications are not reversible (have no inverse).
 
 ## The Clauses
 - An Universal Implication (Modus Ponens) can be informally denoted as a single IF-THEN clause -- "If This (is true) Then That (must be true)".
-- Some funtions can be defined as a set (disjount union) of idividual clauses, so that each clause is "naturally" defiens a *parial function*, thus partitioning the domain.
-- A Sum-Type is indded a set (a disjount union) of individual clauses, which formalizes the explicit partitioning of the domain.
+- Some functions can be defined as a set (disjoint union) of individual clauses, so that each clause is "naturally" defines a *partial function*, thus partitioning the domain.
+- A Sum-Type is indeed a set (a disjoint union) of individual clauses, which formalizes the explicit partitioning of the domain.
 - Pattern-matching expressions on Sum-Types or results of Partial Functions have the particular shapes which are "structural duals".
 - It follows that a (single) clause (which denotes a single **arrow**) is the most abstract and most general, universal building block.
-- The "Nested lets are nested lambdas with an in-place application" -- the famous structual isomorphism can be reduced to clauses.
+- The "Nested lets are nested lambdas with an in-place application" -- the famous structural isomorphism can be reduced to clauses.
 
 ## The homage to mathematical notation
 - `_`  (juxtaposition) -- function application. The finest structural element of any written human language. This is also "naturally" denotes Partial Application.
@@ -43,18 +51,18 @@ We desugar ADTS to just there Universal Types.
 ## Currying and Partial application
 - Uniformity (unification): Every function, including Type-Constructors, is "really" a single-argument `lambda` and every function application is of a curried function (partial or complete).
 - Every multi-argument Type-Signature is a Curried signature with `->` *arrows* between argument types.
-- Just as in SML or Haskell `f x y` is demantically equal to `\x -> \y ->`
-- Clearly capures the notion of a "partially filled enzyme", or just "Not all necessary and sufficent conditions are meet yet" for a reaction to proceed.
-- Currying and Partial Application unifies the single-argument `lambda` expression, and with impliit nesting it capures the notion of "arrows going in".
+- Just as in SML or Haskell `f x y` is semantically equal to `\x -> \y ->`
+- Clearly captures the notion of a "partially filled enzyme", or just "Not all necessary and sufficient conditions are meet yet" for a reaction to proceed.
+- Currying and Partial Application unifies the single-argument `lambda` expression, and with implicit nesting it captures the notion of "arrows going in".
 - There is another fundamental view -- "under-application" is a "suspension", while "over-application" is an implicit recursion.
 
 ## The Class-instance, Trait-impl dillema
 - `class` (a keyword) -- the original Haskell notation for Wadler's **Type-Classes**. All consistent with the language of Predicate Logic.
-- `instance` (a keyword) -- denotes a particualr instance of a given class. This one is simply beautiful.
+- `instance` (a keyword) -- denotes a particular instance of a given class. This one is simply beautiful.
 - `trait` + `impl` -- decoupled from the implicit notion of a rigid class hierarchy (The **Set-Subset** relation) to a **Set-Union** operation.
 
 ## Advanced Syntactic forms
-- `:` (colon) -- type annotation. Universal, after any expression (Evetything is an expression).
+- `:` (colon) -- type annotation. Universal, after any expression (Everything is an expression).
 - `...` (triple dot) -- and so on
 - `1..5` (standard range notation)
 
