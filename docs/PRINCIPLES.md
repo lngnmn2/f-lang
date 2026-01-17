@@ -4,9 +4,23 @@
 ## The Trinity
 - `|` (*OR*, fork)-- a Universal, most abstract and general Algebraic Sum Type
 - `,` (*AND*, join) -- a Universal, most abstract and general Algebraic Product Type
-- `->` (*IMPLY*, step) - a Universal, most abstract and general Step (in a particular direction)
+- `->` (*IMPLY*, maps to, step) - a Universal, most abstract and general Step (in a particular direction)
 
-These are 'built-in'. Haskell nicely defines a tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
+We desugar to just these Universal constructs (most basic structural elements of a DAG).
+
+### Algebraic Data Types are built-in.
+- `|`, `,` and `->` (**maps to**) are 'built-in' (in the fabric of Reality).
+- Every occurrence of any of these symbols denote a corresponding proper Algebraic Data Type.
+
+We desugar ADTS to just there Universal Types.
+
+### Universal unbound Nesting
+- `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
+- Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
+
+### Direction
+- A direction of a DAG is not arbitrary and cannot be reversed on a whim, just because that would be a structural "dual".
+- Direction "Naturally" arise from the flow of implications (connecting every single step). Implications are not reversible (have no inverse).
 
 ## The Clauses
 - An Universal Implication (Modus Ponens) can be informally denoted as a single IF-THEN clause -- "If This (is true) Then That (must be true)".
@@ -40,6 +54,29 @@ These are 'built-in'. Haskell nicely defines a tuple type `(,)`, and has a whole
 - `:` (colon) -- type annotation. Universal, after any expression (Evetything is an expression).
 - `...` (triple dot) -- and so on
 - `1..5` (standard range notation)
+
+## Tribute to SML/NJ (and Mlton)
+- The uniform clause syntax for defining functions by clauses (|) (without the `fun` keyword).
+- `andAlso` (a keyword) for short-circuiting logical Connective **AND** in the Predicate Logic sections.
+- `orElse` (a keyword) for short-circuiting logical Connective **OR** in the Predicate Logic sections.
+- `suchThat` (a keyword) for a set of Predicate that follow
+
+## Type-Level Syntax
+
+### Constructors
+- Capitalized Type-Names (Type-Constructors).
+- Capitalized Sum-Type clauses (Data-Constructors and implicit "type-tags").
+
+### Traits
+- Capitalized Trait-Names (Abstract Data Types).
+- Capitalized named Trait-Bounds (Type-Level predicates).
+- The **Trait-Subtrait** relation shall be expressed with `<:` and `>:` since Traits could, in theory, have a "lower" and "upper" bounds.
+- Trait Bounds are just type-level Equations (Equational Reasoning)
+
+## Disambibuation
+- We say `suchThat` when what follows are mathematical equations -- statements of truth. **Logical Constraints** (required predicares), complex **Trait-Bound** (mathematical equations).
+- In general, we use `suchThat` when we write mathematics (equational reasoning), and we use `where` when we write the code (binding in the Environemnt).
+- At the **Type-Level** we naturally use `suchThat`
 
 ## Imperarive syntactic forms
 - `{}` (curly braces) -- imperative blocks
