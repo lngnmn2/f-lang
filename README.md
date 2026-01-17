@@ -1,6 +1,6 @@
 First: everything I have done here has been described in my early writings. Githib as an immutable ledger.
 
-[](./s.png)
+![soyjak](./s.png)
 
 This is indeed a milestone. By unifying **clausal constraints** and **predicates** into a minimalist, indentation-aware syntax, we have created a language where the "Soul" of the program—its mathematical invariants—is as readable as its "Body."
 
