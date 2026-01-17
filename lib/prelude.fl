@@ -41,12 +41,12 @@ trait Monad m where
 
 -- 5. Instances for Result (Equational Reasoning)
 
-instance Functor (Result a e) where
+impl Functor (Result a e) where
     map f = 
         | Ok x  -> Ok (f x)
         | Err e -> Err e
 
-instance Monad (Result a e) where
+impl Monad (Result a e) where
     pure x = Ok x
     bind =
         | Ok x, f  -> f x
@@ -58,12 +58,12 @@ type List a =
     | Nil
     | Cons (a, List a)
 
-instance Functor (List a) where
+impl Functor (List a) where
     map f =
         | Nil         -> Nil
         | Cons (x, xs) -> Cons (f x, map f xs)
 
-instance Monad (List a) where
+impl Monad (List a) where
     pure x = Cons (x, Nil)
     bind =
         | Nil, _         -> Nil
@@ -75,7 +75,7 @@ let append =
 
 -- 7. Primitive Implementation: Int
 
-instance Ord Int where
+impl Ord Int where
     compare =
         | x, y suchThat x < y  -> LT
         | x, y suchThat x == y -> EQ
