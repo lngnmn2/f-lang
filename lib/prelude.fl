@@ -58,6 +58,46 @@ type List a =
     | Nil
     | Cons (a, List a)
 
+let head =
+    | Nil         -> Nothing
+    | Cons (x, _) -> Just x
+
+let tail =
+    | Nil          -> Nothing
+    | Cons (_, xs) -> Just xs
+
+let null =
+    | Nil -> True
+    | _   -> False
+
+let length =
+    | Nil          -> 0
+    | Cons (_, xs) -> plus (1, length xs)
+
+let foldr f z =
+    | Nil          -> z
+    | Cons (x, xs) -> f (x, foldr f z xs)
+
+let foldl f z =
+    | Nil          -> z
+    | Cons (x, xs) -> foldl f (f (z, x)) xs
+
+let reverse =
+    let rev acc =
+        | Nil          -> acc
+        | Cons (x, xs) -> rev (Cons (x, acc)) xs
+    rev Nil
+
+let filter p =
+    | Nil -> Nil
+    | Cons (x, xs) ->
+        | p x -> Cons (x, filter p xs)
+        | _   -> filter p xs
+
+let append =
+    | Nil, ys         -> ys
+    | Cons (x, xs), ys -> Cons (x, append (xs, ys))
+
 impl Functor (List a) where
     map f =
         | Nil         -> Nil
@@ -69,11 +109,20 @@ impl Monad (List a) where
         | Nil, _         -> Nil
         | Cons (x, xs), f -> append (f x, bind xs f)
 
-let append =
-    | Nil, ys         -> ys
-    | Cons (x, xs), ys -> Cons (x, append (xs, ys))
+-- 7. Monadic Combinators (Flow Logic)
 
--- 7. Primitive Implementation: Int
+let then m1 m2 = bind m1 ( \_ -> m2 )
+
+let join mm = bind mm ( \m -> m )
+
+let sequence =
+    | Nil -> pure Nil
+    | Cons (mx, mxs) -> 
+        bind mx ( \x -> 
+            bind (sequence mxs) ( \xs -> 
+                pure (Cons (x, xs))))
+
+-- 8. Primitive Implementation: Int
 
 impl Ord Int where
     compare =
