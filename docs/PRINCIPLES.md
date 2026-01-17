@@ -26,6 +26,11 @@ These are 'built-in'. Haskell nicely defines a tuple type `(,)`, and has a whole
 - `with` (a keyword) -- a better 'word' to denote the Universal **Set Union** operation (at the level of abstract interfaces)
 - `'` (single quote) -- a prime, as in `let f' = ... in ...`
 
+## Currying and Partial application
+- Clearly capures the notion of a "partially filled enzyme", or just "Not all necessary and sufficent conditions are meet yet" for a reaction to proceed.
+- Currying and Partial Application unifies the single-argument `lambda` expression, and with impliit nesting it capures the notion of "arrows going in".
+- There is another fundamental view -- "under-application" is a "suspension", while "over-application" is an implicit recursion.
+
 ## The Class-instance, Trait-impl dillema
 - `class` (a keyword) -- the original Haskell notation for Wadler's **Type-Classes**. All consistent with the language of Predicate Logic.
 - `instance` (a keyword) -- denotes a particualr instance of a given class. This one is simply beautiful.
