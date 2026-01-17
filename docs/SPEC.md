@@ -20,9 +20,11 @@ This file is designed to be the "Single Source of Truth" for your Haskell parser
   "operators": [
     {"symbol": "( )", "role": "Grouping", "precedence": 1},
     {"symbol": "space", "role": "Application", "precedence": 2},
-    {"symbol": ",", "role": "Product (AND)", "precedence": 3},
-    {"symbol": "|", "role": "Sum (OR)", "precedence": 4},
-    {"symbol": "->", "role": "Transition/Arrow", "precedence": 5}
+    {"symbol": "suchThat", "role": "Refinement", "precedence": 3},
+    {"symbol": ",", "role": "Product (AND)", "precedence": 4},
+    {"symbol": "with", "role": "Structural Update", "precedence": 5},
+    {"symbol": "|", "role": "Sum (OR)", "precedence": 6},
+    {"symbol": "->", "role": "Transition/Arrow", "precedence": 7}
   ],
   "keywords": {
     "definitions": ["type", "trait", "let"],

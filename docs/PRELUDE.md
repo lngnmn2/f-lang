@@ -19,7 +19,7 @@ type Maybe a
     | Nothing
 
 -- The Choice between Success and Failure
-type Result a, e
+type Result a e
     | Ok a
     | Err e
 
@@ -39,12 +39,12 @@ A list is a choice between an empty state and a parallel pair of an element and 
 ```haskell
 type List a
     | Nil
-    | Cons a, List a
+    | Cons (a, List a)
 
 -- Functorial Flow for List
 let map f
     | f, Nil         -> Nil
-    | f, (Cons x, xs) -> Cons (f x), (map f, xs)
+    | f, Cons (x, xs) -> Cons (f x, map f xs)
 
 ```
 
@@ -60,7 +60,7 @@ trait Monad m
     bind : m a, (a -> m b) -> m b
 
 -- Instance for Result
-instance Monad (Result a, e)
+instance Monad (Result a e)
     where
         pure | x -> Ok x
         bind 
@@ -79,11 +79,11 @@ These are the most beautiful in F-lang because they highlight the **Parallel ()*
 
 ```haskell
 -- A Reader is just a Flow from an Environment to a Result
-type Reader r, a
+type Reader r a
     | Reader (r -> a)
 
 let ask    | r -> r
-let run    | (Reader f), r -> f r
+let run    | Reader f, r -> f r
 
 ```
 
@@ -93,16 +93,16 @@ State is a transformation that takes an input state and returns a parallel pair 
 
 ```haskell
 -- State s a is a Flow: s -> (a, s)
-type State s, a
+type State s a
     | State (s -> (a, s))
 
-instance Monad (State s, a)
+instance Monad (State s a)
     where
         pure | x -> State (s -> (x, s))
         bind 
-            | (State g), f -> State (s -> 
+            | State g, f -> State (s -> 
                 let (val, nextState) = g s
-                let (State h) = f val
+                let State h = f val
                 h nextState)
 
 ```
