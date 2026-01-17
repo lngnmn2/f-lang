@@ -31,3 +31,9 @@ The language now strictly maps to a **Monoidal Category** with **Coproducts**.
 
 The clausal function syntax `| A -> B | C -> D` is now formally a sum of morphisms, which is syntactically and semantically consistent with the language's graph-oriented design.
 
+### Re-evaluating the "Trinity" Claims
+With this fix, the claim that **"Every F-lang program is a DAG"** becomes strictly true.
+*   **Product (`,`)** = Parallel merging of edges into a vertex.
+*   **Choice (`|`)** = A branching vertex (Coproduct injection).
+*   **Flow (`->`)** = The directed edge between these vertices.
+
