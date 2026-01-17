@@ -20,11 +20,15 @@ This file is designed to be the "Single Source of Truth" for your Haskell parser
   "operators": [
     {"symbol": "( )", "role": "Grouping", "precedence": 1},
     {"symbol": "space", "role": "Application", "precedence": 2},
-    {"symbol": "suchThat", "role": "Refinement", "precedence": 3},
-    {"symbol": ",", "role": "Product (AND)", "precedence": 4},
-    {"symbol": "with", "role": "Structural Update", "precedence": 5},
-    {"symbol": "->", "role": "Transition/Arrow", "precedence": 6},
-    {"symbol": "|", "role": "Sum (OR)", "precedence": 7}
+    {"symbol": "..", "role": "Range", "precedence": 3},
+    {"symbol": "suchThat", "role": "Refinement", "precedence": 4},
+    {"symbol": ",", "role": "Product (AND)", "precedence": 5},
+    {"symbol": "with", "role": "Set-Union", "precedence": 6},
+    {"symbol": "->", "role": "Transition/Arrow", "precedence": 7},
+    {"symbol": "|", "role": "Sum (OR)", "precedence": 8},
+    {"symbol": ":", "role": "Type Annotation", "precedence": 9},
+    {"symbol": ":=", "role": "Assignment", "precedence": 10},
+    {"symbol": ";", "role": "Sequence", "precedence": 11}
   ],
   "keywords": {
     "definitions": ["type", "trait", "let"],

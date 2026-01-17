@@ -46,17 +46,14 @@ Every type in F-lang is a "Managed Type," subject to three layers of verificatio
 
 ---
 
-## V. Final Verified Logic
+## VI. The Final Syntactic Landscape
 
-The `with` keyword completes the system by allowing **Functional Structural Evolution**. It provides a mechanism for record updates and trait extension without violating the immutability of the underlying products.
+F-lang reconciles pure mathematical notation with practical imperative control:
 
-```haskell
--- The "Perfect" F-lang Function (Equational)
-let evolve system =
-    | s suchThat stable s -> s with (version, nextID s)
-    | _                  -> error "Unstable System"
-
-```
+1. **Refinement**: `suchThat` and `where` for logical and structural constraints.
+2. **Annotation**: `:` for universal type presence.
+3. **Advanced**: `..` for ranges and `...` for continuation.
+4. **Imperative**: `{}` blocks, `;` sequencing, and `:=` destructive assignment.
 
 ---
 
