@@ -14,7 +14,7 @@ In F-lang, there is no `if/else`. There are only **Clauses**. A function body or
 
 ```haskell
 -- Traditional 'let' with clausal branches
-let greet
+let greet =
     | "Alice" -> "Hello, Founder"
     | "Bob"   -> "Hello, Architect"
     | name    -> "Hello, " , name
@@ -106,7 +106,7 @@ In F-lang, a "Record" is simply a named **Product**. The `with` operator allows 
 type User
     | Account String, Int, Bool -- Username, ID, ActiveStatus
 
-let deactivate user
+let deactivate user =
     -- Pattern match the product and update the last element
     | Account name, id, _ -> user with (name, id, False)
 

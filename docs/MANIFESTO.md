@@ -51,8 +51,8 @@ Every type in F-lang is a "Managed Type," subject to three layers of verificatio
 The `with` keyword completes the system by allowing **Functional Structural Evolution**. It provides a mechanism for record updates and trait extension without violating the immutability of the underlying products.
 
 ```haskell
--- The "Perfect" F-lang Function
-let evolve system
+-- The "Perfect" F-lang Function (Equational)
+let evolve system =
     | s suchThat stable s -> s with (version, nextID s)
     | _                  -> error "Unstable System"
 

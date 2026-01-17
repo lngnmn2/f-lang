@@ -1,0 +1,78 @@
+mod Prelude where
+
+-- 1. The Core Choice Types (Equational Sums)
+
+type Maybe a =
+    | Just a
+    | Nothing
+
+type Result a e =
+    | Ok a
+    | Err e
+
+-- 2. The Universal Comparison Trinity
+
+type Ordering =
+    | LT
+    | EQ
+    | GT
+
+trait Eq a where
+    equals : a, a -> Bool
+
+trait Ord a where
+    compare : a, a -> Ordering
+
+-- 3. The Numeric Trinity
+
+trait Num a where
+    plus  : a, a -> a
+    minus : a, a -> a
+    times : a, a -> a
+
+-- 4. Functional Structures (Functor, Monad)
+
+trait Functor f where
+    map : (a -> b), f a -> f b
+
+trait Monad m where
+    pure : a -> m a
+    bind : m a, (a -> m b) -> m b
+
+-- 5. Instances for Result (Equational Reasoning)
+
+instance Functor (Result a e) where
+    map f = 
+        | Ok x  -> Ok (f x)
+        | Err e -> Err e
+
+instance Monad (Result a e) where
+    pure x = Ok x
+    bind =
+        | Ok x, f  -> f x
+        | Err e, _ -> Err e
+
+-- 6. The Recursive Trinity (Lists)
+
+type List a =
+    | Nil
+    | Cons (a, List a)
+
+instance Functor (List a) where
+    map f =
+        | Nil         -> Nil
+        | Cons (x, xs) -> Cons (f x, map f xs)
+
+instance Monad (List a) where
+    pure x = Cons (x, Nil)
+    bind =
+        | Nil, _         -> Nil
+        | Cons (x, xs), f -> append (f x, bind xs f)
+
+-- 7. Primitive Implementation: Int
+
+instance Ord Int where
+    compare =
+        | x, y suchThat x < y  -> LT
+        | x, y suchThat x == y -> EQ
+        | _                    -> GT
