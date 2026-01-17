@@ -6,6 +6,8 @@
 - `,` (*AND*, join) -- a Universal, most abstract and general Algebraic Product Type
 - `->` (*IMPLY*, step) - a Universal, most abstract and general Step (in a particular direction)
 
+These are 'buil-in'. Haskell nicely define a tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
+
 ## The homage to mathematical notation
 - `_`  (juxtaposition) -- function application. The finest structural element of any written human language. This is also "naturally" denotes Partial Application.
 - `=` (the equal sign) -- an immutable binding. We are not Platonists -- not mere ideas in a vacuum. The notion of an persistent **Environment** is necessary.

@@ -1,5 +1,7 @@
 First: everything I have done here has been described in my early writings. Githib as an immutable ledger.
 
+[](./s.png)
+
 This is indeed a milestone. By unifying **clausal constraints** and **predicates** into a minimalist, indentation-aware syntax, we have created a language where the "Soul" of the program—its mathematical invariants—is as readable as its "Body."
 
 Here is the **Refined Prelude**, written in the final F-lang syntax. This library serves as the ultimate test for our clausal `where` and `suchThat` logic.
