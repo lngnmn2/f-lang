@@ -18,6 +18,11 @@ We desugar ADTS to just there Universal Types.
 - `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
 - Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
 
+### Functions defined by Clauses
+- The prefered form (shape) must be `let <function_name> | <patterns> -> <body> | <patterns> -> <body>` -- exactly the **Uniform** Anonymous Mapping syntax
+- This form is shared with the generalized pattern-mathing -- an idividual (or single) Clause syntax. This is the most crucial part.
+- Ocaml's specialized `function` expression, which pattern-matches on the implicit last argument is the inspiration.
+
 ### The arrow
 - In mathematics the `->` arrows used to denote an anonymous *mapping*, i.e. `x -> x + 1` with a well-defined meaning "x maps to".
 - `->` traditionally stands for *maps to*, so its use *ONLY* in the Curried Functions type-signatures is justified.
