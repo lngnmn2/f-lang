@@ -41,6 +41,9 @@ We desugar ADTS to just there Universal Types.
 - `'` (single quote) -- a prime, as in `let f' = ... in ...`
 
 ## Currying and Partial application
+- Uniformity (unification): Every function, including Type-Constructors, is "really" a single-argument `lambda` and every function application is of a curried function (partial or complete).
+- Every multi-argument Type-Signature is a Curried signature with `->` *arrows* between argument types.
+- Just as in SML or Haskell `f x y` is demantically equal to `\x -> \y ->`
 - Clearly capures the notion of a "partially filled enzyme", or just "Not all necessary and sufficent conditions are meet yet" for a reaction to proceed.
 - Currying and Partial Application unifies the single-argument `lambda` expression, and with impliit nesting it capures the notion of "arrows going in".
 - There is another fundamental view -- "under-application" is a "suspension", while "over-application" is an implicit recursion.
@@ -62,6 +65,8 @@ We desugar ADTS to just there Universal Types.
 - `suchThat` (a keyword) for a set of Predicate that follow
 
 ## Type-Level Syntax
+- `->` (an arrow) must be used in Type-Signatures (of Curried functions)
+- `,` (a comma) must be used for an in-place Product Type definition
 
 ### Constructors
 - Capitalized Type-Names (Type-Constructors).
@@ -74,10 +79,17 @@ We desugar ADTS to just there Universal Types.
 - Trait Bounds are just type-level Equations (Equational Reasoning)
 
 ## Disambibuation
+- Every function is uniformly (potentially) a Curried Function, including parameterized Type-Constructors and Data-Constructors.
+- In Trait definitions we use `->` instead of `,` ONLY for type-signatures of Curried Functions (this is a nasty kludge).
 - Trait bounds has to be specified *before* the where clause, simply because mathematical constraints comes prior to code.
 - We say `suchThat` when what follows are mathematical equations -- statements of truth. **Logical Constraints** (required predicares), complex **Trait-Bound** (mathematical equations).
 - In general, we use `suchThat` when we write mathematics (equational reasoning), and we use `where` when we write the code (binding in the Environemnt).
 - At the **Type-Level** we naturally use `suchThat`
+
+## Style
+- `Maybe` instead of `Option` -- `Just a | Nothing` is much more classy than `Some a | None`
+- `Result` instead of `Either` -- `Left | Right` are a disgrace. 
+- Either can be defined for compatibility, as well as Option, as type-aliases (`where Some a = Just a`, etc).
 
 ## Imperarive syntactic forms
 - `{}` (curly braces) -- imperative blocks
