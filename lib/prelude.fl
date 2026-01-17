@@ -30,14 +30,25 @@ trait Num a where
     minus : a, a -> a
     times : a, a -> a
 
--- 4. Functional Structures (Functor, Monad)
+-- 4. Functional Structures (Functor, Applicative, Monad, Alternative)
+
+let id x = x
+
+let const x _ = x
 
 trait Functor f where
     map : (a -> b), f a -> f b
 
-trait Monad m suchThat m <: Functor m where
-    pure : a -> m a
+trait Applicative f suchThat f <: Functor f where
+    pure  : a -> f a
+    apply : f (a -> b), f a -> f b
+
+trait Monad m suchThat m <: Applicative m where
     bind : m a, (a -> m b) -> m b
+
+trait Alternative f suchThat f <: Applicative f where
+    empty : f a
+    alt   : f a, f a -> f a
 
 -- 5. Instances for Result (Equational Reasoning)
 
@@ -46,8 +57,14 @@ impl Functor (Result a e) where
         | Ok x  -> Ok (f x)
         | Err e -> Err e
 
-impl Monad (Result a e) where
+impl Applicative (Result a e) where
     pure x = Ok x
+    apply =
+        | Ok f, Ok x -> Ok (f x)
+        | Err e, _   -> Err e
+        | _, Err e   -> Err e
+
+impl Monad (Result a e) where
     bind =
         | Ok x, f  -> f x
         | Err e, _ -> Err e
@@ -103,11 +120,20 @@ impl Functor (List a) where
         | Nil         -> Nil
         | Cons (x, xs) -> Cons (f x, map f xs)
 
-impl Monad (List a) where
+impl Applicative (List a) where
     pure x = Cons (x, Nil)
+    apply =
+        | Nil, _ -> Nil
+        | Cons (f, fs), xs -> append (map f xs, apply fs xs)
+
+impl Monad (List a) where
     bind =
         | Nil, _         -> Nil
         | Cons (x, xs), f -> append (f x, bind xs f)
+
+impl Alternative (List a) where
+    empty = Nil
+    alt = append
 
 -- 7. Monadic Combinators (Flow Logic)
 

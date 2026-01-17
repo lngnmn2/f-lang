@@ -1,0 +1,94 @@
+mod Parsec where
+
+-- Primitives (to be supplied by VM/Compiler magic later, assumed here)
+-- In a real scenario, these would be 'extern' or 'primitive'
+let unconsStr s = primUnconsStr s -- String -> Maybe (Char, String)
+let eqChar c1 c2 = primEqChar c1 c2 -- Char, Char -> Bool
+
+-- The Parser Type
+-- A parser is a function from String to a List of (Result, RemainingString)
+-- We use List for non-determinism (Alternative), though typically we want Result for error messages.
+-- For a "Simple" Parsec, we'll use Result for success/failure, but List is better for backtracking.
+-- Let's stick to the classic: String -> List (a, String) to fully support Alternative properly.
+-- Wait, 'Result' in our Prelude is Ok/Err. 
+-- Let's use: type Parser a = String -> Result (a, String) String
+-- This supports simple LL(1) style without complex backtracking state, but we can implement 'try' manually if needed.
+
+type Parser a =
+    | P (String -> Result (a, String) String)
+
+let runParser p input =
+    | P f, s -> f s
+
+-- Functor
+impl Functor Parser where
+    map f =
+        | P p -> P ( \s -> 
+            map ( \ (x, s') -> (f x, s') ) (p s) )
+
+-- Applicative
+impl Applicative Parser where
+    pure x = P ( \s -> Ok (x, s) )
+    apply =
+        | P pf, P px -> P ( \s ->
+            bind (pf s) ( \ (f, s') ->
+                bind (px s') ( \ (x, s'') ->
+                    Ok (f x, s'') ) ) )
+
+-- Monad
+impl Monad Parser where
+    bind =
+        | P p, f -> P ( \s ->
+            bind (p s) ( \ (x, s') ->
+                runParser (f x) s' ) )
+
+-- Alternative (Choice)
+impl Alternative Parser where
+    empty = P ( \_ -> Err "Empty" )
+    alt =
+        | P p1, P p2 -> P ( \s ->
+            | p1 s suchThat | Ok _ -> True | _ -> False -> p1 s
+            | _ -> p2 s )
+
+-- Core Combinators
+
+let satisfy predicate = P ( \s ->
+    | unconsStr s ->
+        | Just (c, rest) suchThat predicate c -> Ok (c, rest)
+        | Just (c, _) -> Err "Unexpected char"
+        | Nothing -> Err "Unexpected EOF" )
+
+let char c = satisfy (eqChar c)
+
+let string s =
+    | unconsStr s ->
+        | Just (c, rest) -> 
+            bind (char c) ( \_ -> 
+                bind (string rest) ( \_ -> 
+                    pure s ) )
+        | Nothing -> pure ""
+
+let many p =
+    alt ( some p ) ( pure Nil )
+
+let some p =
+    bind p ( \x ->
+        bind (many p) ( \xs ->
+            pure (Cons (x, xs)) ) )
+
+let eof = P ( \s ->
+    | unconsStr s ->
+        | Nothing -> Ok ((), s)
+        | Just _  -> Err "Expected EOF" )
+
+-- Useful Utilities
+
+let option default p = alt p (pure default)
+
+let choice ps = foldr alt empty ps
+
+let between open close p =
+    bind open ( \_ ->
+        bind p ( \x ->
+            bind close ( \_ ->
+                pure x ) ) )
