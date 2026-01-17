@@ -69,6 +69,10 @@ instance Monad (List a) where
         | Nil, _         -> Nil
         | Cons (x, xs), f -> append (f x, bind xs f)
 
+let append =
+    | Nil, ys         -> ys
+    | Cons (x, xs), ys -> Cons (x, append (xs, ys))
+
 -- 7. Primitive Implementation: Int
 
 instance Ord Int where

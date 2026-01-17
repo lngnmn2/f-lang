@@ -111,54 +111,67 @@ instance Monad (State s a)
 
 ## 5. Summary of the F-lang Prelude
 
-By using the Trinity, we have achieved a **Type-to-Graph** mapping that is significantly cleaner than the Haskell equivalent:
 
-| Concept | Haskell | F-lang (Trinity) | Graph Interpretation |
-| --- | --- | --- | --- |
-| **Product** | `(a, b)` | `a, b` | Parallel wires |
-| **Sum** | `data E = L a | R b` | `a |
-| **Arrow** | `a -> b` | `a -> b` | Directional flow |
-| **Monad** | Typeclass + Do-notation | `bind` + Clausal flow | Sequential Graphing |
 
----
+| Concept | F-lang Notation | CT Interpretation |
 
-## 🏗️ Visualizing the Prelude
+| --- | --- | --- |
 
-If you pipe this `prelude.fl` through our **GraphViz Emitter**, the result is a perfect visualization of functional architecture. The `State` monad appears as a "looping wire" that carries the  atom through every transformation, while `Result` appears as a "diamond" that can short-circuit the flow.
+| **Product** | `a, b` | Monoidal Product ($\times$) |
 
-### ✅ Verification Complete
+| **Sum** | `a | b` | Coproduct ($+$) |
 
-We have successfully re-implemented the Haskell Prelude. The code is shorter, the syntax is more consistent (only 3 operators!), and the underlying model is a pure DAG.
+| **Arrow** | `a -> b` | Exponential Object ($B^A$) |
+
+| **Clausal** | `f = | p -> r` | Sum of Morphisms |
+
+
 
 ---
+
+
 
 ## 💎 `Data.Math`: The Trinity of Numeric Logic
 
-In F-lang, we don't just "do math"—we define numeric relationships as flows.
+
 
 ### 1. The Comparison Trinity (`Eq`, `Ord`)
 
-Comparison is a flow from a parallel pair to a `Choice` node (the `Ordering` sum).
+
 
 ```haskell
-type Ordering | LT | EQ | GT
 
-trait Eq a
+type Ordering = | LT | EQ | GT
+
+
+
+trait Eq a where
+
     equals : a, a -> Bool
 
-trait Ord a
-    where | _ -> Eq a -- Ord implies Eq
+
+
+trait Ord a where
+
     compare : a, a -> Ordering
 
+
+
 -- Implementation for Int
-instance Ord Int
-    compare
+
+instance Ord Int where
+
+    compare =
+
         | x, y suchThat x < y  -> LT
+
         | x, y suchThat x == y -> EQ
+
         | _                    -> GT
 
-
 ```
+
+
 Notice the "suchThat".
 ---
 

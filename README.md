@@ -1,3 +1,5 @@
+First: everything I have done here has been described in my early writings. Githib as an immutable ledger.
+
 This is indeed a milestone. By unifying **clausal constraints** and **predicates** into a minimalist, indentation-aware syntax, we have created a language where the "Soul" of the program—its mathematical invariants—is as readable as its "Body."
 
 Here is the **Refined Prelude**, written in the final F-lang syntax. This library serves as the ultimate test for our clausal `where` and `suchThat` logic.
@@ -501,4 +503,8 @@ With this script, F-lang moves from theoretical design to a functional reality. 
 * **F#'s** clean indentation and type declarations.
 * **Shen's** predicate logic.
 * **Erlang's** uniform matching.
+
+---
+
+Yes, I am doing here something similar to what Hickey did to the Lisp tradition, but with subtlety and a good taste.
 
