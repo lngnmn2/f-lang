@@ -321,8 +321,8 @@ In F-lang, the relationship between values is defined by these operators. Parent
 | **1** | `( )` | **Grouping** |  |
 | **2** | `space` | **Application** |  Function application (Left-assoc) |
 | **3** | `,` | **Product** |  Conjunction (AND) |
-| **4** | `|` | **Sum** |  Disjunction (OR) |
-| **5** | `->` | **Mapping** |  Transformation/Arrow |
+| **4** | `->` | **Mapping** |  Transformation/Arrow |
+| **5** | `|` | **Sum** |  Disjunction (OR) |
 | **6** | `where` / `with` | **Context** |  Environmental constraint |
 
 ---

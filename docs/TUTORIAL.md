@@ -31,11 +31,14 @@ Forget the "Tuple" as a special data structure. In F-lang, the comma `,` is a fi
 * **Precedence**: The comma is lower than application but higher than the arrow.
 
 ```haskell
--- A function taking a product (2-tuple)
-let area (width, height) -> width * height
+-- A function taking a product (2-tuple) as a single argument
+let area (width, height) = width * height
 
 -- A function returning a product
-let getCoordinates | _ -> 10, 20
+let getCoordinates = | _ -> 10, 20
+
+-- Currying is pervasive: A function of two arguments
+let rectangleArea width height = width * height
 
 ```
 
@@ -47,6 +50,7 @@ This is the most significant shift. Parentheses `( )` do not "create" a tuple; t
 
 * `f x, y`  `(f x), y` (A pair where the first element is the result of `f x`).
 * `f (x, y)`  `f` applied to the pair `x, y`.
+* `f x y`  `(f x) y` (Function application is left-associative).
 
 ---
 

@@ -22,33 +22,39 @@ let runParser p input =
 
 -- Functor
 impl Functor Parser where
-    map f =
-        | P p -> P ( \s -> 
+    map f parser =
+        let P p = parser
+        P ( \s -> 
             map ( \ (x, s') -> (f x, s') ) (p s) )
 
 -- Applicative
 impl Applicative Parser where
     pure x = P ( \s -> Ok (x, s) )
-    apply =
-        | P pf, P px -> P ( \s ->
+    apply parserF parserX =
+        let P pf = parserF
+        let P px = parserX
+        P ( \s ->
             bind (pf s) ( \ (f, s') ->
                 bind (px s') ( \ (x, s'') ->
                     Ok (f x, s'') ) ) )
 
 -- Monad
 impl Monad Parser where
-    bind =
-        | P p, f -> P ( \s ->
+    bind parser k =
+        let P p = parser
+        P ( \s ->
             bind (p s) ( \ (x, s') ->
-                runParser (f x) s' ) )
+                runParser (k x) s' ) )
 
 -- Alternative (Choice)
 impl Alternative Parser where
     empty = P ( \_ -> Err "Empty" )
-    alt =
-        | P p1, P p2 -> P ( \s ->
-            | p1 s suchThat | Ok _ -> True | _ -> False -> p1 s
-            | _ -> p2 s )
+    alt p1 p2 =
+        let P run1 = p1
+        let P run2 = p2
+        P ( \s ->
+            | run1 s suchThat | Ok _ -> True | _ -> False -> run1 s
+            | _ -> run2 s )
 
 -- Core Combinators
 

@@ -18,8 +18,8 @@ F-lang utilizes a "Minimum Optimum" syntax. All complexity is handled by five le
 
 * **Application**: `f x` (Highest Precedence)
 * **Product**: `a, b` (The logical AND)
-* **Sum**: `A | B` (The logical OR)
 * **Arrow**: `a -> b` (The mapping)
+* **Sum**: `A | B` (The logical OR)
 * **Grouping**: `( )` (The identity )
 
 ---

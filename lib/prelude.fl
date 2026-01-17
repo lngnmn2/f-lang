@@ -18,17 +18,17 @@ type Ordering =
     | GT
 
 trait Eq a where
-    equals : a, a -> Bool
+    equals : a -> a -> Bool
 
 trait Ord a suchThat a <: Eq a where
-    compare : a, a -> Ordering
+    compare : a -> a -> Ordering
 
 -- 3. The Numeric Trinity
 
 trait Num a where
-    plus  : a, a -> a
-    minus : a, a -> a
-    times : a, a -> a
+    plus  : a -> a -> a
+    minus : a -> a -> a
+    times : a -> a -> a
 
 -- 4. Functional Structures (Functor, Applicative, Monad, Alternative)
 
@@ -37,37 +37,40 @@ let id x = x
 let const x _ = x
 
 trait Functor f where
-    map : (a -> b), f a -> f b
+    map : (a -> b) -> f a -> f b
 
 trait Applicative f suchThat f <: Functor f where
     pure  : a -> f a
-    apply : f (a -> b), f a -> f b
+    apply : f (a -> b) -> f a -> f b
 
 trait Monad m suchThat m <: Applicative m where
-    bind : m a, (a -> m b) -> m b
+    bind : m a -> (a -> m b) -> m b
 
 trait Alternative f suchThat f <: Applicative f where
     empty : f a
-    alt   : f a, f a -> f a
+    alt   : f a -> f a -> f a
 
 -- 5. Instances for Result (Equational Reasoning)
 
 impl Functor (Result a e) where
-    map f = 
-        | Ok x  -> Ok (f x)
-        | Err e -> Err e
+    map f res = 
+        | res 
+            | Ok x  -> Ok (f x)
+            | Err e -> Err e
 
 impl Applicative (Result a e) where
     pure x = Ok x
-    apply =
-        | Ok f, Ok x -> Ok (f x)
-        | Err e, _   -> Err e
-        | _, Err e   -> Err e
+    apply f res =
+        | f, res
+            | Ok g, Ok x -> Ok (g x)
+            | Err e, _   -> Err e
+            | _, Err e   -> Err e
 
 impl Monad (Result a e) where
-    bind =
-        | Ok x, f  -> f x
-        | Err e, _ -> Err e
+    bind res f =
+        | res
+            | Ok x  -> f x
+            | Err e -> Err e
 
 -- 6. The Recursive Trinity (Lists)
 
@@ -116,24 +119,27 @@ let append =
     | Cons (x, xs), ys -> Cons (x, append (xs, ys))
 
 impl Functor (List a) where
-    map f =
-        | Nil         -> Nil
-        | Cons (x, xs) -> Cons (f x, map f xs)
+    map f list =
+        | list
+            | Nil         -> Nil
+            | Cons (x, xs) -> Cons (f x, map f xs)
 
 impl Applicative (List a) where
     pure x = Cons (x, Nil)
-    apply =
-        | Nil, _ -> Nil
-        | Cons (f, fs), xs -> append (map f xs, apply fs xs)
+    apply fs list =
+        | fs
+            | Nil -> Nil
+            | Cons (f, rest) -> append (map f list) (apply rest list)
 
 impl Monad (List a) where
-    bind =
-        | Nil, _         -> Nil
-        | Cons (x, xs), f -> append (f x, bind xs f)
+    bind list f =
+        | list
+            | Nil         -> Nil
+            | Cons (x, xs) -> append (f x) (bind xs f)
 
 impl Alternative (List a) where
     empty = Nil
-    alt = append
+    alt l1 l2 = append l1 l2
 
 -- 7. Monadic Combinators (Flow Logic)
 
@@ -141,17 +147,19 @@ let then m1 m2 = bind m1 ( \_ -> m2 )
 
 let join mm = bind mm ( \m -> m )
 
-let sequence =
-    | Nil -> pure Nil
-    | Cons (mx, mxs) -> 
-        bind mx ( \x -> 
-            bind (sequence mxs) ( \xs -> 
-                pure (Cons (x, xs))))
+let sequence list =
+    | list
+        | Nil -> pure Nil
+        | Cons (mx, mxs) -> 
+            bind mx ( \x -> 
+                bind (sequence mxs) ( \xs -> 
+                    pure (Cons (x, xs))))
 
 -- 8. Primitive Implementation: Int
 
 impl Ord Int where
-    compare =
-        | x, y suchThat x < y  -> LT
-        | x, y suchThat x == y -> EQ
-        | _                    -> GT
+    compare x y =
+        | True -- Apply to dummy True to evaluate clauses
+            | _ suchThat x < y  -> LT
+            | _ suchThat x == y -> EQ
+            | _                 -> GT

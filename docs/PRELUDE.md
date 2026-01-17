@@ -42,9 +42,10 @@ type List a
     | Cons (a, List a)
 
 -- Functorial Flow for List
-let map f
-    | f, Nil         -> Nil
-    | f, Cons (x, xs) -> Cons (f x, map f xs)
+let map f list =
+    | list
+        | Nil         -> Nil
+        | Cons (x, xs) -> Cons (f x, map f xs)
 
 ```
 
@@ -57,15 +58,16 @@ We define the "Monadic" behavior as a trait. In F-lang, `bind` is just a specifi
 ```haskell
 trait Monad m
     pure : a -> m a
-    bind : m a, (a -> m b) -> m b
+    bind : m a -> (a -> m b) -> m b
 
 -- Instance for Result
 instance Monad (Result a e)
     where
-        pure | x -> Ok x
-        bind 
-            | Ok x, f  -> f x
-            | Err e, _ -> Err e
+        pure x = Ok x
+        bind res f =
+            | res
+                | Ok x  -> f x
+                | Err e -> Err e
 
 ```
 
@@ -82,8 +84,10 @@ These are the most beautiful in F-lang because they highlight the **Parallel ()*
 type Reader r a
     | Reader (r -> a)
 
-let ask    | r -> r
-let run    | Reader f, r -> f r
+let ask = | r -> r
+let run reader r = 
+    let Reader f = reader
+    f r
 
 ```
 
@@ -98,12 +102,12 @@ type State s a
 
 instance Monad (State s a)
     where
-        pure | x -> State (s -> (x, s))
-        bind 
-            | State g, f -> State (s -> 
-                let (val, nextState) = g s
-                let State h = f val
-                h nextState)
+        pure x = State ( \s -> (x, s) )
+        bind stateM f = State ( \s -> 
+            let State g = stateM
+            let (val, nextState) = g s
+            let State h = f val
+            h nextState )
 
 ```
 
@@ -147,13 +151,13 @@ type Ordering = | LT | EQ | GT
 
 trait Eq a where
 
-    equals : a, a -> Bool
+    equals : a -> a -> Bool
 
 
 
 trait Ord a where
 
-    compare : a, a -> Ordering
+    compare : a -> a -> Ordering
 
 
 
@@ -161,13 +165,11 @@ trait Ord a where
 
 instance Ord Int where
 
-    compare =
-
-        | x, y suchThat x < y  -> LT
-
-        | x, y suchThat x == y -> EQ
-
-        | _                    -> GT
+    compare x y =
+        | True
+            | _ suchThat x < y  -> LT
+            | _ suchThat x == y -> EQ
+            | _                 -> GT
 
 ```
 
@@ -181,14 +183,14 @@ Numeric types are atoms that support parallel arithmetic flows.
 
 ```haskell
 trait Num a
-    plus  : a, a -> a
-    minus : a, a -> a
-    times : a, a -> a
+    plus  : a -> a -> a
+    minus : a -> a -> a
+    times : a -> a -> a
 
 -- Real math using suchThat to prevent undefined behavior
 trait Floating a
     where | _ -> Num a
-    div : a, (a suchThat val != 0) -> a
+    div : a -> (a suchThat val != 0) -> a
 
 ```
 
@@ -197,9 +199,9 @@ trait Floating a
 In F-lang, the Solver looks at the `Result` instance we wrote:
 
 ```haskell
--- Step 1: bind (pure x), f
--- Step 2: bind (Ok x), f  (by pure definition)
--- Step 3: f x             (by bind definition)
+-- Step 1: bind (pure x) f
+-- Step 2: bind (Ok x) f  (by pure definition)
+-- Step 3: f x            (by bind definition)
 -- Result: Verified.
 
 ```
