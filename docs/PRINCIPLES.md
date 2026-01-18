@@ -131,7 +131,23 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - A function defined by clauses has the same syntax and semantics as `match` multi-clause expression. It desugars into "a single match-body" function.
 - Maybe should generalize to just one single generalized `match` expression, and case being its specialization.
 
+## Monadic Comprehensions (inspired by Scala3)
+- `[]` the square brackets must be ONLY used as distinct delimiters for Comprehension blocks (an embedded specialized DSL).
+- `<-` shall be used only within the Comprehension blocks for monadic "binding".
+
+## The simple Classic LISP macro system
+- Macros can *ONLY* be used inside the Monadic Comprehension Blocks.
+- The classic Lisp Meta-syntax - quote, unquote, quote-splicing, backquote.
+- `'` strictly denotes quote within Comprehension blocks.
+- `,` commma is strictly denotes unquote within the Comprehension blocks.
+- `,@` is unquote-splicing form the simple macro system
+- String literals are *ONLY* in duoble quotes.
+
+## Declaratige Testing 
+- Philosophy: Tests are just Monadic Comprehensions blocks.
+- Comprehensions + Macros form a minimal **Declarative** DSL for testing.
+
 ## Imperarive syntactic forms
-- `{}` (curly braces) -- imperative blocks
+- `{}` (curly braces) -- imperative blocks, Haskell's *do-notation*
 - `;` (semicolon) -- imperative explicit delimiter
 - `:=` (colon-equal) -- imperative assignment (a destructive over-write)
