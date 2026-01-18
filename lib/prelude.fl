@@ -1,4 +1,8 @@
-mod Prelude where
+module Prelude where
+
+type Bool
+    | True
+    | False
 
 -- 1. The Core Choice Types (Equational Sums)
 

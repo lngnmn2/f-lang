@@ -26,11 +26,14 @@ We desugar ADTS to just there Universal Types.
 - A Clause is an ultimate building block of the uniform, minimalist syntax, used consistently with indentation. No extra symbol or keyword clutter.
 - When we are defining a function we shall prefer clauses. When we use clauses we should not use match or case, just clauses and |. The rule is to prefer the uniform and minimalist clausal  │ │   notation whenever possible, and reverse the "full" match or case expressions ONLY for special cases.
 - Prefer minimalist syntax in defining function clause -- use only `|` and indentation.
+- Anonymous Clauses shall be used in Comprehensions, as they are used in matching expression (defining individual "branches")
 
 ### Unified Syntax
--   `match | p -> e`: Generalized clausal mapping.
--   `let f | p -> e`: Functions as clausal mappings.
--   `if p then a else b`: Sugar for clausal choice.
+- `f x`: Function application is juxtaposition.
+- `x shallBe 2`: Haskell style backticks to turn a function into an *infix* form.
+- `match | p -> e`: Generalized clausal mapping.
+- `let f | p -> e`: Functions as clausal mappings.
+- `if p then a else b`: Sugar for clausal choice.
 
 ### Mathematical Integrity
 -   `->`: Only for curried signatures and mappings.
@@ -40,7 +43,7 @@ We desugar ADTS to just there Universal Types.
 ### Functions defined by Clauses
 - The prefered form (shape) must be `let <function_name> | <patterns> -> <body> | <patterns> -> <body>` -- exactly the **Uniform** Anonymous Mapping syntax
 - This form is shared with the generalized pattern-mathing -- an idividual (or single) Clause syntax. This is the most crucial part.
-- Ocaml's specialized `function` expression, which pattern-matches on the implicit last argument is the inspiration.
+- Ocaml's specialized `function` expression, which pattern-matches on the implicit last argument is the inspiration for Anynimous Clauses.
 
 ### The arrow
 - In mathematics the `->` arrows used to denote an anonymous *mapping*, i.e. `x -> x + 1` with a well-defined meaning "x maps to".
@@ -151,3 +154,10 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - `{}` (curly braces) -- imperative blocks, Haskell's *do-notation*
 - `;` (semicolon) -- imperative explicit delimiter
 - `:=` (colon-equal) -- imperative assignment (a destructive over-write)
+
+## Experemental
+- `= function` syntax with pattern-matching on the last argument from Ocaml
+- GAT (Generalized Associated Methods) from Rust
+- `impl ... for ...` -- Rust-like implementation blocks *ONLY* for associated Trait methods.
+- `ext <Trait> with` -- for Scala3-like extension methods
+- `[for i in Blah]` -- Monadic Comprehensions from Scala3
