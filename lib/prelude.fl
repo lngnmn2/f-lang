@@ -159,6 +159,9 @@ let sequence =
 
 -- 8. Primitive Implementation: Int
 
+impl Eq Int where
+    equals x y = (x == y)
+
 impl Ord Int where
     compare x y =
         (x < y)
@@ -167,3 +170,8 @@ impl Ord Int where
                 (x == y)
                     | True  -> EQ
                     | False -> GT
+
+impl Num Int where
+    plus x y = (x + y)
+    minus x y = (x - y)
+    times x y = (x * y)
