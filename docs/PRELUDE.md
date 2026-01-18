@@ -43,7 +43,7 @@ type List a
 
 -- Functorial Flow for List
 let map f list =
-    | list
+    list
         | Nil         -> Nil
         | Cons (x, xs) -> Cons (f x, map f xs)
 
@@ -65,7 +65,7 @@ instance Monad (Result a e)
     where
         pure x = Ok x
         bind res f =
-            | res
+            res
                 | Ok x  -> f x
                 | Err e -> Err e
 
@@ -166,10 +166,12 @@ trait Ord a where
 instance Ord Int where
 
     compare x y =
-        | True
-            | _ suchThat x < y  -> LT
-            | _ suchThat x == y -> EQ
-            | _                 -> GT
+        (x < y)
+            | True  -> LT
+            | False -> 
+                (x == y)
+                    | True  -> EQ
+                    | False -> GT
 
 ```
 

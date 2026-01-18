@@ -53,13 +53,14 @@ impl Alternative Parser where
         let P run1 = p1
         let P run2 = p2
         P ( \s ->
-            | run1 s suchThat | Ok _ -> True | _ -> False -> run1 s
-            | _ -> run2 s )
+            (run1 s)
+                | Ok res -> Ok res
+                | Err _  -> run2 s )
 
 -- Core Combinators
 
 let satisfy predicate = P ( \s ->
-    | unconsStr s ->
+    (unconsStr s)
         | Just (c, rest) suchThat predicate c -> Ok (c, rest)
         | Just (c, _) -> Err "Unexpected char"
         | Nothing -> Err "Unexpected EOF" )
@@ -67,7 +68,7 @@ let satisfy predicate = P ( \s ->
 let char c = satisfy (eqChar c)
 
 let string s =
-    | unconsStr s ->
+    (unconsStr s)
         | Just (c, rest) -> 
             bind (char c) ( \_ -> 
                 bind (string rest) ( \_ -> 
@@ -83,7 +84,7 @@ let some p =
             pure (Cons (x, xs)) ) )
 
 let eof = P ( \s ->
-    | unconsStr s ->
+    (unconsStr s)
         | Nothing -> Ok ((), s)
         | Just _  -> Err "Expected EOF" )
 

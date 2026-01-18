@@ -18,6 +18,25 @@ We desugar ADTS to just there Universal Types.
 - `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
 - Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
 
+### Indentation 
+- Everything is an expresssion, which denotes a value it is reducible to.
+- We use indentation to define and express code block-structure (expressions).
+
+### Minimal uniform syntax
+- A Clause is an ultimate building block of the uniform, minimalist syntax, used consistently with indentation. No extra symbol or keyword clutter.
+- When we are defining a function we shall prefer clauses. When we use clauses we should not use match or case, just clauses and |. The rule is to prefer the uniform and minimalist clausal  │ │   notation whenever possible, and reverse the "full" match or case expressions ONLY for special cases.
+- Prefer minimalist syntax in defining function clause -- use only `|` and indentation.
+
+### Unified Syntax
+-   `match | p -> e`: Generalized clausal mapping.
+-   `let f | p -> e`: Functions as clausal mappings.
+-   `if p then a else b`: Sugar for clausal choice.
+
+### Mathematical Integrity
+-   `->`: Only for curried signatures and mappings.
+-   `,`: Only for product types and data.
+-   `|`: Only for sum types and clausal branching. 
+
 ### Functions defined by Clauses
 - The prefered form (shape) must be `let <function_name> | <patterns> -> <body> | <patterns> -> <body>` -- exactly the **Uniform** Anonymous Mapping syntax
 - This form is shared with the generalized pattern-mathing -- an idividual (or single) Clause syntax. This is the most crucial part.
@@ -103,6 +122,14 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - `Maybe` instead of `Option` -- `Just a | Nothing` is much more classy than `Some a | None`
 - `Result` instead of `Either` -- `Left | Right` are a disgrace. 
 - Either can be defined for compatibility, as well as Option, as type-aliases (`where Some a = Just a`, etc).
+
+## The core syntacitc forms
+- Haskell style generic and uniform multi-clause  `case <boolean exoression> of  <expression> `
+- `if` is a syntactic sugar for exactly two-clause `case` with required `else` clause.
+- `when` is a single-clause `case` without an `else` clause
+- Generalized and uniform multi-clause `match | <pattterns> -> <body> | <pattern> -> <body> ... `
+- A function defined by clauses has the same syntax and semantics as `match` multi-clause expression. It desugars into "a single match-body" function.
+- Maybe should generalize to just one single generalized `match` expression, and case being its specialization.
 
 ## Imperarive syntactic forms
 - `{}` (curly braces) -- imperative blocks

@@ -12,6 +12,8 @@ Welcome to F-lang. This guide focuses on the three core pillars of the language:
 
 In F-lang, there is no `if/else`. There are only **Clauses**. A function body or a type definition is simply a vertical list of cases separated by the pipe `|`.
 
+The **Unified Anonymous Mapping** is the core of the language. When matching a variable, the variable comes first, and the clauses follow using indentation:
+
 ```haskell
 -- Traditional 'let' with clausal branches
 let greet =
@@ -19,11 +21,38 @@ let greet =
     | "Bob"   -> "Hello, Architect"
     | name    -> "Hello, " , name
 
+-- Variable-first clausal application (Matching)
+let describe x = 
+    x
+        | 0 -> "Zero"
+        | _ -> "Non-zero"
 ```
 
 ---
 
-## 2. The Power of the Product (`,`)
+## 2. Syntactic Sugar for Logic
+
+F-lang provides familiar forms for boolean logic, all of which desugar to the generalized clausal application.
+
+* **`case`**: For explicit branching on values.
+* **`if`**: Sugar for a two-clause check on `Bool`.
+* **`when`**: Sugar for a single-clause check.
+
+```haskell
+-- If expression (desugars to clausal application)
+let absolute x = 
+    (x >= 0)
+        | True  -> x
+        | False -> -x
+
+-- When expression
+let debug msg p =
+    p | True -> print msg
+```
+
+---
+
+## 3. The Power of the Product (`,`)
 
 Forget the "Tuple" as a special data structure. In F-lang, the comma `,` is a first-class mathematical operator representing a **Product**.
 
