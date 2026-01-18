@@ -137,6 +137,7 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 ## Monadic Comprehensions (inspired by Scala3)
 - `[]` the square brackets must be ONLY used as distinct delimiters for Comprehension blocks (an embedded specialized DSL).
 - `<-` shall be used only within the Comprehension blocks for monadic "binding".
+- We do not want to look like Scala syntax, we only want individual features which enchance *declarative* expressiveness of the syntax.
 
 ## The simple Classic LISP macro system
 - Macros can *ONLY* be used inside the Monadic Comprehension Blocks.
@@ -147,8 +148,11 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - String literals are *ONLY* in duoble quotes.
 
 ## Declaratige Testing 
-- Philosophy: Tests are just Monadic Comprehensions blocks.
-- Comprehensions + Macros form a minimal **Declarative** DSL for testing.
+- Philosophy: Tests are just *declarative* specification of constraints (ideally, with equations) using Monadic Comprehensions blocks.
+- Comprehensions + Lisp-like Macros form a minimal **Declarative** DSL for rigorous testing.
+- We want syntactic sugar with carefully chosen semantics (Monadic Comprehension) which allow us to mimic Scalatest embedded declarative testing DSLs embedded into a library.
+- The testing library shall be written together with prelude and strdlib (implementing the minimal set of required features for testing library *FIRST*).
+- Having declarative testing library as the top priority, even before prelude is stabilized, is the key point of properly applying TTD and XP practices and processes.
 
 ## Imperarive syntactic forms
 - `{}` (curly braces) -- imperative blocks, Haskell's *do-notation*
@@ -161,3 +165,6 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - `impl ... for ...` -- Rust-like implementation blocks *ONLY* for associated Trait methods.
 - `ext <Trait> with` -- for Scala3-like extension methods
 - `[for i in Blah]` -- Monadic Comprehensions from Scala3
+
+Idealy, we want to "borrow" all the *declarative* syntactic forms, especially those which mimic the tradtitiona mathematical notation.
+
