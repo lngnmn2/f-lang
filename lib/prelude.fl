@@ -1,181 +1,287 @@
 module Prelude where
 
-type Bool
-    | True
-    | False
+-- ============================================================================
+-- 1. Fundamental Combinators
+-- ============================================================================
 
--- 1. The Core Choice Types (Equational Sums)
+let id x = x
+let const x, _ = x
+let flip f, x, y = f y, x
 
-type Maybe a =
+-- Function Application ($) and Composition (.)
+infix let ($) f, x = f x
+infix let (.) f, g, x = f (g x)
+
+-- ============================================================================
+-- 2. Core Primitives (Rust Type Correspondence)
+-- ============================================================================
+
+-- | Bool :: bool (1 byte)
+type Bool | True | False
+
+let not b | True -> False | False -> True
+
+-- | Char :: char (32-bit Unicode Scalar)
+type Char -- Native
+
+-- | Int :: i64 (64-bit Signed Integer)
+type Int -- Native
+
+-- | Double :: f64 (64-bit IEEE 754 Float)
+type Double -- Native
+
+-- | String :: String (UTF-8 Vec<u8>)
+type String -- Native
+
+-- | Unit :: ()
+type Unit | Unit
+
+-- | Evaluation Control
+-- Forces evaluation of x, returns y.
+let seq : a -> b -> b -- Native primSeq
+let error : String -> a -- Native primError
+let undefined = error "Prelude.undefined"
+
+-- ============================================================================
+-- 3. The IO Monad (Built-in / Foreign)
+-- ============================================================================
+
+-- | IO a :: Box<dyn FnOnce(World) -> (World, a)>
+-- The IO Monad is a built-in primitive type representing an effectful computation.
+type IO a -- Native
+
+-- | Monadic Primitives (GHC Statistics: Most Fundamental)
+-- These are the "Assembly Instructions" of the F-lang Runtime.
+
+let returnIO : a -> IO a                  -- Native primIOReturn
+let bindIO   : IO a -> (a -> IO b) -> IO b -- Native primIOBind
+
+-- | Console I/O
+let putStr     : String -> IO Unit -- Native primPutStr
+let putLine    : String -> IO Unit -- Native primPutLine
+let getLine    : IO String         -- Native primGetLine
+let getChar    : IO Char           -- Native primGetChar
+let print      : Show a => a -> IO Unit
+let print x = putLine (show x)
+
+-- | File I/O
+let readFile   : String -> IO String         -- Native primReadFile
+let writeFile  : String -> String -> IO Unit -- Native primWriteFile
+
+-- | Mutable State (IORefs)
+type IORef a -- Native
+let newIORef   : a -> IO (IORef a)           -- Native primNewIORef
+let readIORef  : IORef a -> IO a             -- Native primReadIORef
+let writeIORef : IORef a -> a -> IO Unit     -- Native primWriteIORef
+
+-- | Exception Handling
+let throwIO : String -> IO a                 -- Native primThrowIO
+let catch   : IO a -> (String -> IO a) -> IO a -- Native primCatch
+
+-- ============================================================================
+-- 4. Algebraic Data Types
+-- ============================================================================
+
+type Maybe a
     | Just a
     | Nothing
 
-type Result a e =
+-- Rust-like Aliases
+let Option = Maybe
+let Some   = Just
+let None   = Nothing
+
+type Result a, e
     | Ok a
     | Err e
 
--- 2. The Universal Comparison Trinity
+type Either a, b
+    | Left a
+    | Right b
 
-type Ordering =
-    | LT
-    | EQ
-    | GT
+type Ordering | LT | EQ | GT
 
+-- ============================================================================
+-- 5. Traits & Hierarchies
+-- ============================================================================
+
+-- Equality & Ordering
 trait Eq a where
-    equals : a -> a -> Bool
+    equals : a, a -> Bool
+    infix let (==) = equals
+    infix let (!=) x, y = not (equals x, y)
 
-trait Ord a suchThat a <: Eq a where
-    compare : a -> a -> Ordering
+trait Ord a where Eq a
+    compare : a, a -> Ordering
+    infix let (<) x, y  = (compare x, y) == LT
+    infix let (<=) x, y = (compare x, y) != GT
+    infix let (>) x, y  = (compare x, y) == GT
+    infix let (>=) x, y = (compare x, y) != LT
+    max x, y | x <= y -> y | _ -> x
+    min x, y | x <= y -> x | _ -> y
 
--- 3. The Numeric Trinity
-
+-- Numeric Hierarchy (Haskell Compatible)
 trait Num a where
-    plus  : a -> a -> a
-    minus : a -> a -> a
-    times : a -> a -> a
+    plus   : a, a -> a
+    minus  : a, a -> a
+    times  : a, a -> a
+    negate : a -> a
+    abs    : a -> a
+    signum : a -> a
+    fromInteger : Int -> a
+    infix let (+) = plus
+    infix let (-) = minus
+    infix let (*) = times
 
--- 4. Functional Structures (Functor, Applicative, Monad, Alternative)
+trait Integral a where Num a, Ord a
+    quot : a, a -> a
+    rem  : a, a -> a
+    div  : a, a -> a
+    mod  : a, a -> a
+    toInteger : a -> Int
+    infix let (%) = mod
 
-let id x = x
+trait Fractional a where Num a
+    divide : a, a -> a
+    recip  : a -> a
+    fromRational : Double -> a
+    infix let (/) = divide
 
-let const x _ = x
+trait Floating a where Fractional a
+    pi   : a
+    exp  : a -> a
+    log  : a -> a
+    sqrt : a -> a
+    sin  : a -> a
+    cos  : a -> a
+    asin : a -> a
+    acos : a -> a
+    atan : a -> a
 
+-- Show
+trait Show a where show : a -> String
+
+-- Monadic Hierarchy
 trait Functor f where
-    map : (a -> b) -> f a -> f b
+    map : (a -> b), f a -> f b
 
-trait Applicative f suchThat f <: Functor f where
+trait Applicative f where Functor f
     pure  : a -> f a
-    apply : f (a -> b) -> f a -> f b
+    apply : f (a -> b), f a -> f b
+    infix let (<*>) = apply
 
-trait Monad m suchThat m <: Applicative m where
-    bind : m a -> (a -> m b) -> m b
+trait Monad m where Applicative m
+    bind : m a, (a -> m b) -> m b
+    infix let (>>=) = bind
+    infix let (>>) m1, m2 = bind m1, (\_ -> m2)
 
-trait Alternative f suchThat f <: Applicative f where
+trait Alternative f where Applicative f
     empty : f a
     alt   : f a -> f a -> f a
+    infix let (<|>) = alt
 
--- 5. Instances for Result (Equational Reasoning)
+let guard cond
+    | cond -> pure Unit
+    | _    -> empty
 
-impl Functor (Result a e) where
-    map f res = 
-        res 
-            | Ok x  -> Ok (f x)
-            | Err e -> Err e
+-- ============================================================================
+-- 6. Implementations (Instances)
+-- ============================================================================
 
-impl Applicative (Result a e) where
+-- IO Instance (Built-in binding)
+impl Functor IO where
+    map f, io = bindIO io, (\x -> returnIO (f x))
+
+impl Applicative IO where
+    pure = returnIO
+    apply f_io, x_io = bindIO f_io, (\f -> bindIO x_io, (\x -> returnIO (f x)))
+
+impl Monad IO where
+    bind = bindIO
+
+-- Result Instances
+impl Functor (Result a, e) where map f, res | Ok x -> Ok (f x) | Err e -> Err e
+impl Applicative (Result a, e) where
     pure x = Ok x
-    apply pf px =
-        pf
-            | Ok f -> 
-                px
-                    | Ok x -> Ok (f x)
-                    | Err e -> Err e
-            | Err e -> \_ -> Err e
+    apply pf, px | Ok f -> map f, px | Err e -> Err e
+impl Monad (Result a, e) where bind res, f | Ok x -> f x | Err e -> Err e
 
-impl Monad (Result a e) where
-    bind res f =
-        res
-            | Ok x  -> f x
-            | Err e -> Err e
+-- Maybe Instances
+impl Functor Maybe where
+    map f, m | Just x -> Just (f x) | Nothing -> Nothing
+impl Applicative Maybe where
+    pure = Just
+    apply pf, px | Just f -> map f, px | Nothing -> Nothing
+impl Monad Maybe where
+    bind m, f | Just x -> f x | Nothing -> Nothing
+impl Alternative Maybe where
+    empty = Nothing
+    alt m1, m2 | Just x -> Just x | Nothing -> m2
 
--- 6. The Recursive Trinity (Lists)
+-- List Implementation
+type List a | Nil | Cons (a, List a)
+let isEmpty | Nil -> True | _ -> False
+let head | Cons (x, _) -> Just x | Nil -> Nothing
+let length | Nil -> 0 | Cons (_, xs) -> 1 + (length xs)
+let foldl f, acc | Nil -> acc | Cons (x, xs) -> foldl f, (f acc, x), xs
+let reverse list = 
+    let rev acc | Nil -> acc | Cons (x, xs) -> rev (Cons (x, acc)), xs
+    rev Nil, list
+let intercalate sep, list
+    | Nil -> ""
+    | Cons (x, xs) -> | Nil -> x | _ -> x ++ sep ++ (intercalate sep, xs), xs
+let append xs, ys | Nil -> ys | Cons (x, rest) -> Cons (x, append rest, ys)
+infix let (++) = append
 
-type List a =
-    | Nil
-    | Cons (a, List a)
+-- Monadic List Combinators
+let sequence list
+    | Nil -> pure Nil
+    | Cons (mx, mxs) -> mx >>= \x -> sequence mxs >>= \xs -> pure (Cons (x, xs))
+let mapM f, list = sequence (map f, list)
+let mapM_ f, list | Nil -> pure Unit | Cons (x, xs) -> f x >> mapM_ f, xs
 
-let head =
-    | Nil         -> Nothing
-    | Cons (x, _) -> Just x
-
-let tail =
-    | Nil          -> Nothing
-    | Cons (_, xs) -> Just xs
-
-let null =
-    | Nil -> True
-    | _   -> False
-
-let length =
-    | Nil          -> 0
-    | Cons (_, xs) -> plus 1 (length xs)
-
-let foldr f z =
-    | Nil          -> z
-    | Cons (x, xs) -> f x (foldr f z xs)
-
-let foldl f z =
-    | Nil          -> z
-    | Cons (x, xs) -> foldl f (f z x) xs
-
-let reverse =
-    let rev acc =
-        | Nil          -> acc
-        | Cons (x, xs) -> rev (Cons (x, acc)) xs
-    rev Nil
-
-let filter p =
-    | Nil -> Nil
-    | Cons (x, xs) ->
-        (p x)
-            | True  -> Cons (x, filter p xs)
-            | False -> filter p xs
-
-let append =
-    | Nil -> \ys -> ys
-    | Cons (x, xs) -> \ys -> Cons (x, append xs ys)
+impl Show a => Show (List a) where
+    show list = "[" ++ (intercalate ", ", (map show, list)) ++ "]"
 
 impl Functor (List a) where
-    map f list =
-        list
-            | Nil         -> Nil
-            | Cons (x, xs) -> Cons (f x, map f xs)
-
+    map f | Nil -> Nil | Cons (x, xs) -> Cons (f x, map f, xs)
 impl Applicative (List a) where
     pure x = Cons (x, Nil)
-    apply fs list =
-        fs
-            | Nil -> Nil
-            | Cons (f, rest) -> append (map f list) (apply rest list)
-
+    apply fs, xs | Nil -> Nil | Cons (f, crest) -> append (map f, xs) (apply crest, xs)
 impl Monad (List a) where
-    bind list f =
-        list
-            | Nil         -> Nil
-            | Cons (x, xs) -> append (f x) (bind xs f)
-
+    bind list, f | Nil -> Nil | Cons (x, xs) -> append (f x) (bind xs, f)
 impl Alternative (List a) where
     empty = Nil
-    alt l1 l2 = append l1 l2
+    alt xs, ys = append xs, ys
 
--- 7. Monadic Combinators (Flow Logic)
+-- Native Type Instances
+impl Show String where show s = s
+impl Show Char where show c = primCharToString c
 
-let then m1 m2 = bind m1 ( \_ -> m2 )
-
-let join mm = bind mm ( \m -> m )
-
-let sequence =
-    | Nil -> pure Nil
-    | Cons (mx, mxs) -> 
-        bind mx ( \x -> 
-            bind (sequence mxs) ( \xs -> 
-                pure (Cons (x, xs))))
-
--- 8. Primitive Implementation: Int
-
-impl Eq Int where
-    equals x y = (x == y)
-
-impl Ord Int where
-    compare x y =
-        (x < y)
-            | True  -> LT
-            | False -> 
-                (x == y)
-                    | True  -> EQ
-                    | False -> GT
-
+impl Eq Int where equals x, y = primEqInt x, y
+impl Ord Int where compare x, y = primCompareInt x, y
 impl Num Int where
-    plus x y = (x + y)
-    minus x y = (x - y)
-    times x y = (x * y)
+    plus x, y = primAddInt x, y; minus x, y = primSubInt x, y; times x, y = primMulInt x, y
+    negate x = primNegInt x; abs x = | x < 0 -> negate x | _ -> x; signum x = | x == 0 -> 0 | x < 0 -> -1 | _ -> 1
+    fromInteger x = x
+impl Integral Int where
+    quot x, y = primQuotInt x, y; rem x, y = primRemInt x, y
+    div x, y = primDivInt x, y; mod x, y = primModInt x, y
+    toInteger x = x
+impl Show Int where show i = primIntToString i
+
+impl Eq Double where equals x, y = primEqDouble x, y
+impl Ord Double where compare x, y = primCompareDouble x, y
+impl Num Double where
+    plus x, y = primAddDouble x, y; minus x, y = primSubDouble x, y; times x, y = primMulDouble x, y
+    negate x = primNegDouble x; abs x = primAbsDouble x; signum x = primSignumDouble x
+    fromInteger i = primIntToDouble i
+impl Fractional Double where
+    divide x, y = primDivDouble x, y; recip x = 1.0 / x; fromRational x = x
+impl Floating Double where
+    pi = 3.141592653589793; exp x = primExpDouble x; log x = primLogDouble x; sqrt x = primSqrtDouble x
+    sin x = primSinDouble x; cos x = primCosDouble x; asin x = primAsinDouble x; acos x = primAcosDouble x; atan x = primAtanDouble x
+impl Show Double where show x = primDoubleToString x
+
+impl Eq Char where equals x, y = primEqChar x, y
+impl Ord Char where compare x, y = primCompareChar x, y
