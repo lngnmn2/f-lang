@@ -1,6 +1,10 @@
+# Implementation Tasks & Notes
 
-- the _inverse_ of a type define by clauses is a correspondig match expression, while a fucnction is just a _disjoint union_ of clauses
-- the `match` expresion syntax, every binding site (left-handside) is a `pattern` (as in Erlang)
-- functions defined by clauses (single-clause `match` expressions)
+## Core Semantics
+*   **Inverse Relation**: Ensure the `match` expression is the strict inverse of type definition by clauses.
+*   **Disjoint Unions**: Functions are defined as disjoint unions of clauses.
+*   **Pattern Binding**: Every left-hand side binding site is a pattern (Erlang-style).
+*   **Single-Clause Functions**: A function defined by a single clause is equivalent to a single-branch `match`.
 
-Minimal Uniformity is the ultimate goal.
+## Syntax Goals
+*   **Minimal Uniformity**: Eliminate special cases; treat functions, `case`, and `let` as unified pattern-matching constructs.

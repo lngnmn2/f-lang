@@ -1,11 +1,8 @@
+# F-Lang Specification Manifest
 
-The **F-lang Specification Manifest (JSON-SM)** is the final bridge between our conceptual design and the physical implementation. This machine-readable specification encapsulates every rule, operator precedence, and clausal semantic we have architected.
+This document defines the F-Lang specification in a machine-readable JSON format (JSON-SM). It serves as the authoritative reference for the parser, VM, and tooling.
 
-This file is designed to be the "Single Source of Truth" for your Haskell parser, your Rust VM, and any future Language Server (LSP) implementation.
-
----
-
-## 📄 F-lang Specification Manifest (v1.0.0)
+## F-Lang Specification Manifest (v1.0.0)
 
 ```json
 {
@@ -55,9 +52,4 @@ This file is designed to be the "Single Source of Truth" for your Haskell parser
     "unification": "Structural and Behavioral (via Trait Evidence)"
   }
 }
-
 ```
-
----
-
-

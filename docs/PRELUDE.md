@@ -1,59 +1,48 @@
-This is the ultimate stress test for our **Trinity Syntax**.
+# F-Lang Prelude: Standard Library Fundamentals
 
-Here we prove that F-lang isn't just a subset of Haskell—it is a more fundamental refinement of it.
+This document outlines the core types and traits of the F-Lang Standard Library.
 
-In F-lang, a Monad isn't a complex container; it is a **Graph Pattern** that defines how to sequence flows while carrying "ambient" state or failure.
+## 1. Basic Types
 
----
-
-## 💎 `prelude.fl`: The Foundations of Logic
-
-### 1. The Core Sums (Choice)
-
-We define the universal branching types. Notice how we use our clausal refinement to define them as choice nodes.
+We define the fundamental algebraic data types using clausal syntax.
 
 ```haskell
--- The Choice between Presence and Absence
+-- Optional values
 type Maybe a
     | Just a
     | Nothing
 
--- The Choice between Success and Failure
+-- Error handling
 type Result a e
     | Ok a
     | Err e
 
--- Compatibility Alias (Either is just a Result)
+-- Compatibility Aliases
 let Either = Result
 let Left   = Err
 let Right  = Ok
-
 ```
 
----
+## 2. Recursive Types
 
-### 2. The Recursive Sum (Lists)
-
-A list is a choice between an empty state and a parallel pair of an element and the rest of the graph.
+Recursive structures demonstrate the composition of sum and product types.
 
 ```haskell
+-- Linked List
 type List a
     | Nil
     | Cons (a, List a)
 
--- Functorial Flow for List
+-- Functorial Map for List
 let map f list =
     list
-        | Nil         -> Nil
+        | Nil          -> Nil
         | Cons (x, xs) -> Cons (f x, map f xs)
-
 ```
 
----
+## 3. Core Traits
 
-### 3. The Trinity of Control: Traits
-
-We define the "Monadic" behavior as a trait. In F-lang, `bind` is just a specific way to bridge two flows.
+The `Monad` trait defines the sequencing of computational flows.
 
 ```haskell
 trait Monad m
@@ -68,19 +57,14 @@ instance Monad (Result a e)
             res
                 | Ok x  -> f x
                 | Err e -> Err e
-
 ```
 
----
+## 4. Monadic Structures
 
-### 4. The Computational Graphs: Reader and State
-
-These are the most beautiful in F-lang because they highlight the **Parallel ()** nature of stateful computation.
-
-#### Reader (Ambient Environment)
+### Reader (Environment)
+Models access to an immutable environment.
 
 ```haskell
--- A Reader is just a Flow from an Environment to a Result
 type Reader r a
     | Reader (r -> a)
 
@@ -88,15 +72,12 @@ let ask = | r -> r
 let run reader r = 
     let Reader f = reader
     f r
-
 ```
 
-#### State (The Persistent DAG)
-
-State is a transformation that takes an input state and returns a parallel pair of a value and the updated state.
+### State (Persistent)
+Models state transformation via a persistent DAG.
 
 ```haskell
--- State s a is a Flow: s -> (a, s)
 type State s a
     | State (s -> (a, s))
 
@@ -108,63 +89,23 @@ instance Monad (State s a)
             let (val, nextState) = g s
             let State h = f val
             h nextState )
-
 ```
 
----
+## 5. Numeric Traits
 
-## 5. Summary of the F-lang Prelude
-
-
-
-| Concept | F-lang Notation | CT Interpretation |
-
-| --- | --- | --- |
-
-| **Product** | `a, b` | Monoidal Product ($\times$) |
-
-| **Sum** | `a | b` | Coproduct ($+$) |
-
-| **Arrow** | `a -> b` | Exponential Object ($B^A$) |
-
-| **Clausal** | `f = | p -> r` | Sum of Morphisms |
-
-
-
----
-
-
-
-## 💎 `Data.Math`: The Trinity of Numeric Logic
-
-
-
-### 1. The Comparison Trinity (`Eq`, `Ord`)
-
-
+Numeric types support arithmetic operations and can be refined.
 
 ```haskell
-
-type Ordering = | LT | EQ | GT
-
-
+type Ordering | LT | EQ | GT
 
 trait Eq a where
-
     equals : a -> a -> Bool
 
-
-
 trait Ord a where
-
     compare : a -> a -> Ordering
 
-
-
 -- Implementation for Int
-
 instance Ord Int where
-
     compare x y =
         (x < y)
             | True  -> LT
@@ -173,17 +114,6 @@ instance Ord Int where
                     | True  -> EQ
                     | False -> GT
 
-```
-
-
-Notice the "suchThat".
----
-
-### 2. The Numeric Trinity (`Num`)
-
-Numeric types are atoms that support parallel arithmetic flows.
-
-```haskell
 trait Num a
     plus  : a -> a -> a
     minus : a -> a -> a
@@ -193,39 +123,12 @@ trait Num a
 trait Floating a
     where | _ -> Num a
     div : a -> (a suchThat val != 0) -> a
-
 ```
 
----
+## Summary
 
-In F-lang, the Solver looks at the `Result` instance we wrote:
-
-```haskell
--- Step 1: bind (pure x) f
--- Step 2: bind (Ok x) f  (by pure definition)
--- Step 3: f x            (by bind definition)
--- Result: Verified.
-
-```
-
----
-
-## 🏆 The "Standard Library" Complete
-
-We have now successfully reconstructed the functional universe:
-
-| Module | Core Building Block | F-lang Expression |
-| --- | --- | --- |
+| Module | Concept | Representation |
+| :--- | :--- | :--- |
 | **Logic** | Choice (`|`) | `Maybe`, `Result`, `Ordering` |
 | **Data** | Parallel (`,`) | `List`, `Product`, `State` |
 | **Control** | Flow (`->`) | `Monad`, `Reader`, `Math` |
-
-
-### Why F-lang Wins
-
-1. **Mathematical Isomorphism**: The code you write is identical to the Category Theory diagram.
-2. **Refined Safety**: `div` literally cannot receive a `0` because of the `suchThat` constraint.
-3. **Visual Clarity**: Every part of this Prelude can be rendered as a DAG via our GraphViz Emitter.
-
----
-

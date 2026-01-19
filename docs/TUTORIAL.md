@@ -1,91 +1,63 @@
-This tutorial is designed for the developer transitioning from traditional functional languages (like Haskell or F#) to the **F-lang** "Clausal Way." In F-lang, we stop treating types, logic, and patterns as separate concepts and start treating them as a single, unified mathematical flow.
+# F-Lang Tutorial: The Clausal Paradigm
 
----
+This guide introduces the core concepts of F-Lang: **Unified Pattern Matching**, **Product Types**, and **Refinements**.
 
-# 💎 THE F-LANG TUTORIAL: THINKING IN CLAUSES
+## 1. Unified Pattern Matching
 
-Welcome to F-lang. This guide focuses on the three core pillars of the language: **Product-Sum Duality**, **Clausal Refinement**, and **Mathematical Grouping**.
+In F-Lang, everything is a pattern match. Functions and `let` bindings are defined by clauses.
 
----
-
-## 1. Everything is a Pattern Match
-
-In F-lang, there is no `if/else`. There are only **Clauses**. A function body or a type definition is simply a vertical list of cases separated by the pipe `|`.
-
-The **Unified Anonymous Mapping** is the core of the language. When matching a variable, the variable comes first, and the clauses follow using indentation:
+### Function Definition
+Variables come first, followed by indented clauses.
 
 ```haskell
--- Traditional 'let' with clausal branches
+-- Clausal function
 let greet =
     | "Alice" -> "Hello, Founder"
     | "Bob"   -> "Hello, Architect"
-    | name    -> "Hello, " , name
+    | name    -> "Hello, " ++ name
 
--- Variable-first clausal application (Matching)
-let describe x = 
+-- Pattern matching on arguments
+let describe x =
     x
         | 0 -> "Zero"
         | _ -> "Non-zero"
 ```
 
----
+## 2. Control Flow Desugaring
 
-## 2. Syntactic Sugar for Logic
+Standard control flow constructs are syntactic sugar for generalized clausal application.
 
-F-lang provides familiar forms for boolean logic, all of which desugar to the generalized clausal application.
-
-* **`case`**: For explicit branching on values.
-* **`if`**: Sugar for a two-clause check on `Bool`.
-* **`when`**: Sugar for a single-clause check.
+*   **`if`**: A two-clause match on `Bool`.
+*   **`when`**: A single-clause match.
 
 ```haskell
--- If expression (desugars to clausal application)
-let absolute x = 
+-- Desugars to clauses
+let absolute x =
     (x >= 0)
         | True  -> x
         | False -> -x
-
--- When expression
-let debug msg p =
-    p | True -> print msg
 ```
 
----
+## 3. Product Types (`,`)
 
-## 3. The Power of the Product (`,`)
+The comma `,` is the **Product** operator. It creates values that hold multiple items simultaneously.
 
-Forget the "Tuple" as a special data structure. In F-lang, the comma `,` is a first-class mathematical operator representing a **Product**.
-
-* **Logic**: `a, b` means "I have an  AND a ."
-* **Precedence**: The comma is lower than application but higher than the arrow.
+*   **Logic**: `a, b` (AND).
+*   **Precedence**: Lower than application, higher than arrow `->`.
 
 ```haskell
--- A function taking a product (2-tuple) as a single argument
+-- Function taking a product (tuple)
 let area (width, height) = width * height
 
--- A function returning a product
-let getCoordinates = | _ -> 10, 20
-
--- Currying is pervasive: A function of two arguments
-let rectangleArea width height = width * height
-
+-- Function returning a product
+let getCoordinates = | _ -> (10, 20)
 ```
 
----
-
-## 3. Parentheses are Only for Precedence
-
-This is the most significant shift. Parentheses `( )` do not "create" a tuple; they only define the order of operations, exactly like in algebra.
-
-* `f x, y`  `(f x), y` (A pair where the first element is the result of `f x`).
-* `f (x, y)`  `f` applied to the pair `x, y`.
-* `f x y`  `(f x) y` (Function application is left-associative).
-
----
+**Note**: Parentheses `( )` are strictly for precedence. `f x, y` parses as `(f x), y` (a pair). `f (x, y)` passes a pair to `f`.
 
 ## 4. Refinement Types (`suchThat`)
 
-F-lang allows you to attach logic directly to your data. Instead of checking for "Zero" inside a function, you define a type that *cannot be zero*.
+Refinements attach logical predicates to types, strictly enforced by the compiler.
 
 ```haskell
 type Natural = Int
@@ -93,84 +65,40 @@ type Natural = Int
         | n : n >= 0 -> True
         | _          -> False
 
+-- 'n' is guaranteed to be non-negative
 let sqrt n : Natural -> Float
--- The compiler guarantees 'n' is never negative here.
-
 ```
 
----
+## 5. Traits and Constraints (`where`)
 
-## 5. Behavioral Traits (`where`)
-
-Traits in F-lang (like Type-classes) are applied via clauses. This allows for **Conditional Constraints**—a feature that allows a type to behave differently depending on its structure.
+Traits are applied via clauses, enabling conditional conformance based on structure.
 
 ```haskell
 type Box a
     | Full a
     | Empty
     where
-        | Full a -> Show a  -- We only need 'Show' if the box is Full
-
+        | Full a -> Show a  -- 'Show' required only if Full
 ```
 
----
+## 6. Extensible Records (`with`)
 
-## 🎯 SUMMARY: THE CLAUSAL CHEAT SHEET
-
-| Goal | F-lang Notation | Mathematical Meaning |
-| --- | --- | --- |
-| **Combine Data** | `a, b` |  (Product) |
-| **Branch Logic** | `| Case -> Result` |  (Sum) |
-| **Constraint** | `where | ...` | Environmental Fact () |
-| **Safety** | `suchThat | ...` | Predicate Filter () |
-| **Nesting** | `( ... )` | Precedence Override |
-
----
-
-
-## 1. The `with` Keyword: Structural Evolution
-
-In F-lang, a "Record" is simply a named **Product**. The `with` operator allows us to create a new product based on an existing one, replacing or adding fields while maintaining the clausal invariants.
-
-* **Logic**:  represents a structural update where  shadows .
-* **Precedence**: Higher than the arrow `->`, lower than the comma `,`.
+The `with` operator performs structural updates on Product types (Records).
 
 ```haskell
 type User
-    | Account String, Int, Bool -- Username, ID, ActiveStatus
+    | Account (String, Int, Bool)
 
 let deactivate user =
-    -- Pattern match the product and update the last element
-    | Account name, id, _ -> user with (name, id, False)
-
+    -- Update the 3rd element of the product
+    | Account (name, id, _) -> user with (name, id, False)
 ```
 
----
+## Summary
 
-## 2. Extensible Traits with `with`
-
-Because our traits are clausal, we can use `with` to extend existing behavior. This is the F-lang answer to "Inheritance"—we call it **Clausal Composition**.
-
-```haskell
-trait Logger
-    log : String -> IO Unit
-
--- Extend a standard logger with a timestamping 'with' clause
-let timestampedLogger baseLogger
-    | msg -> baseLogger with (log ("[" , currentTime , "] " , msg))
-
-```
-
----
-
-## 3. The Final Architecture: A Summary of Elegance
-
-We leave F-lang with a design that is **Fixed, Finite, and Formal**:
-
-1. **Syntactic Singularity**: Parentheses `()` for grouping, Commas `,` for products, Pipes `|` for sums.
-2. **Clausal Unity**: The same syntax defines Types, Functions, Traits, and Refinements.
-3. **Refinement Proofs**: `suchThat` ensures that logic is not an afterthought, but a requirement for compilation.
-4. **Zero-Overhead Abstraction**: The STG VM ensures that these high-level concepts compile to efficient "Slide and Enter" machine code.
-
----
-
+| Concept | Syntax | Meaning |
+| :--- | :--- | :--- |
+| **Product** | `a, b` | Grouping / AND |
+| **Sum** | `| Case -> Result` | Branching / OR |
+| **Constraint** | `where` | Contextual Fact |
+| **Refinement** | `suchThat` | Logical Filter |

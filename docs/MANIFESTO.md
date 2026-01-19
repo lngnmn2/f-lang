@@ -1,65 +1,45 @@
-It is done. Here is the **F-lang Project Manifesto**, a formal consolidation of our architectural journey. This document serves as the "Genesis Block" for your implementation, ensuring that the mathematical purity and clausal intent of the language remain uncompromised.
+# The F-Lang Manifesto
 
----
+## I. Core Philosophy
 
-# 📜 THE F-LANG MANIFESTO (v1.0)
+F-Lang eliminates the artificial distinction between **structure** (data), **behavior** (traits), and **logic** (refinements). It treats source code as a set of mathematical constraints resolved into an optimized state machine. The design prioritizes:
+*   **Minimalism**: Zero syntactic noise.
+*   **Uniformity**: Consistent application of clausal logic.
+*   **Rigor**: Type-level enforcement of invariants.
 
-### *A Unified Specification for Clausal Functional Programming*
+## II. Syntactic Structure
 
-## I. The Core Philosophy
+The syntax is reduced to a "Minimum Optimum" set of operators, utilizing five levels of precedence to manage complexity:
 
-F-lang is designed to eliminate the distinction between **structure** (data), **behavior** (traits), and **logic** (refinements). It treats the source code as a set of mathematical constraints that are resolved into an optimized state machine.
-
----
-
-## II. The Syntax Singularity
-
-F-lang utilizes a "Minimum Optimum" syntax. All complexity is handled by five levels of precedence, reducing the cognitive load of the programmer.
-
-* **Application**: `f x` (Highest Precedence)
-* **Product**: `a, b` (The logical AND)
-* **Arrow**: `a -> b` (The mapping)
-* **Sum**: `A | B` (The logical OR)
-* **Grouping**: `( )` (The identity )
-
----
+*   **Application**: `f x` (Highest Precedence)
+*   **Product**: `a, b` (Logical AND / Pairing)
+*   **Arrow**: `a -> b` (Mapping / Implication)
+*   **Sum**: `A | B` (Logical OR / Choice)
+*   **Grouping**: `( )` (Identity / Override)
 
 ## III. The Three Pillars of Refinement
 
-Every type in F-lang is a "Managed Type," subject to three layers of verification:
+Every type is a "Managed Type," subject to three layers of verification:
 
-1. **Structure (`type`)**: Defined as a Sum of Products.
-2. **Behavior (`where`)**: Conditional constraints that prove a type satisfies a Trait.
-3. **Integrity (`suchThat`)**: Logical predicates proven by a Sequent Calculus solver.
-
----
+1.  **Structure (`type`)**: Defined as a Sum of Products.
+2.  **Behavior (`where`)**: Conditional constraints proving trait satisfaction.
+3.  **Integrity (`suchThat`)**: Logical predicates discharged by a Sequent Calculus solver.
 
 ## IV. Technical Specification Summary
 
 | Component | Technology | Role |
-| --- | --- | --- |
-| **Stage 0** | Haskell | Lexing, Precedence Parsing, AST Generation. |
+| :--- | :--- | :--- |
+| **Frontend** | Haskell | Lexing, Precedence Parsing, AST Generation. |
 | **Inference** | Algorithm W+ | Clausal constraint propagation. |
 | **Solver** | Sequent Calculus | Discharging `suchThat` proof obligations. |
-| **Stage 1** | Rust VM | **STG Machine** execution (Spineless Tagless G-Machine). |
+| **Backend** | Rust VM | **STG Machine** execution (Spineless Tagless G-Machine). |
 | **Memory** | Immutability/GC | TCO-optimized stack frames with `Slide` instructions. |
 
----
+## V. Syntactic Landscape
 
-## VI. The Final Syntactic Landscape
+F-Lang reconciles mathematical notation with practical imperative control:
 
-F-lang reconciles pure mathematical notation with practical imperative control:
-
-1. **Refinement**: `suchThat` and `where` for logical and structural constraints.
-2. **Annotation**: `:` for universal type presence.
-3. **Advanced**: `..` for ranges and `...` for continuation.
-4. **Imperative**: `{}` blocks, `;` sequencing, and `:=` destructive assignment.
-
----
-
-## 🏁 The Architect's Closing
-
-The F-lang specification is now finalized. It stands as a bridge between the rigorous world of proof assistants and the practical world of high-performance systems programming.
-
-It has been a pleasure to architect this vision with you. Your environment is set, your parser is ready, and your manifesto is written.
-
+1.  **Refinement**: `suchThat` and `where` for logical and structural constraints.
+2.  **Annotation**: `:` for type assertions.
+3.  **Advanced**: `..` for ranges and `...` for continuations.
+4.  **Imperative**: `{}` blocks, `;` sequencing, and `:=` destructive assignment (strictly controlled).
