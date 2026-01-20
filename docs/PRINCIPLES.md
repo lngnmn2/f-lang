@@ -1,6 +1,15 @@
 
 # The Principles ("set in stone")
 
+The main goal is to arrive at a unified syntax, inspired by both the classic FP languages (SML, Erlang, Haskell, Ocaml) as well as the modern languages (F#, Scala3, Rust).
+The *main principle* is to use traditional *declarative* mathematical notation at the *Type-level*, and the syntax which is best suited for defining functions by clauses, function composition and uniform pattern mathing at the level of code.
+The canonical examples are the unified `type` keyword from F# and unified `let` binding from F#, which both rely on indentation.
+Since we use indentation to determine the structure of complex (nested) expressions, we can use the traditional (neatly perfect) Common-Lisp macro system syntactic special forms with just four minimal tokens: "' , ,@ `".
+
+At the very fundamental level, we use so-called *Trinity* to denote **both**, the proper *Algebraic Data Types* (at the type-level), and the corresponding *"dual" nested structure* at the code level (clauses for clauses in sum-types, compounds for product-types).
+We use `->` ("maps to") only in the context of mapping (both at the type-level and in the code), and parenthesis only for defining the precedence and grouping (exactly as in the traditional mathematical notation).
+In general, we want to use the mathematical notation symbols with the exact meaning they have in math. We also want to use common "words" of mathematical language ("such that", "given", "where") with their traditional well-defined meaning.
+
 ## The Trinity
 - `|` (*OR*, fork)-- a Universal, most abstract and general Algebraic Sum Type
 - `,` (*AND*, join) -- a Universal, most abstract and general Algebraic Product Type
@@ -8,15 +17,15 @@
 
 We desugar to just these Universal constructs (most basic structural elements of a DAG).
 
+### Universal unbound Nesting
+- `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
+- Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
+
 ### Algebraic Data Types are built-in.
 - `|`, `,` and `->` (**maps to**) are 'built-in' (in the fabric of Reality).
 - Every occurrence of any of these symbols denote a corresponding proper Algebraic Data Type.
 
 We desugar ADTS to just there Universal Types.
-
-### Universal unbound Nesting
-- `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
-- Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
 
 ### Indentation 
 - Everything is an expresssion, which denotes a value it is reducible to.
@@ -29,11 +38,13 @@ We desugar ADTS to just there Universal Types.
 - Anonymous Clauses shall be used in Comprehensions, as they are used in matching expression (defining individual "branches")
 
 ### Unified Syntax
-- `f x`: Function application is juxtaposition.
+- `f x`: Function application is a juxtaposition.
+- Currying is *Universal* - every function is a curried function, every application is of a curryed function (partial or fully saturated).
 - `x shallBe 2`: Haskell style backticks to turn a function into an *infix* form.
-- `match | p -> e`: Generalized clausal mapping.
-- `let f | p -> e`: Functions as clausal mappings.
-- `if p then a else b`: Sugar for clausal choice.
+#### Graph structure (forks)
+- `<var> | p -> e | ...`: Generalized clausal mapping of muptiple "possible paths" (branches, arms).
+- `let f | p -> e | ...`: Functions as clausal set of mappings (distinct partial functions).
+- `if p then a else b`: Syntactic sugar for clausal (structural) definition of multiple possible branches `<predicate> | True ... | False ...` (otherwise).
 
 ### Mathematical Integrity
 -   `->`: Only for curried signatures and mappings.
@@ -56,6 +67,7 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 ### Direction
 - A direction of a DAG is not arbitrary and cannot be reversed on a whim, just because that would be a structural "dual".
 - Direction "Naturally" arise from the flow of implications (connecting every single step). Implications are not reversible (have no inverse).
+- Direction is implicit (and is necessary) in any "fork", it is part of the element's intrinsic "structure".
 
 ## The Clauses
 - An Universal Implication (Modus Ponens) can be informally denoted as a single IF-THEN clause -- "If This (is true) Then That (must be true)".
@@ -88,6 +100,7 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 - `instance` (keyword) -- Denotes a particular instance. Beautiful, but we choose unification.
 - `trait` + `impl` -- **SELECTED**. Decoupled from the implicit notion of a rigid class hierarchy (The **Set-Subset** relation) to a **Set-Union** operation.
 - We substitute `trait` for class and `impl` for instance to emphasize the compositional nature.
+- the syntax for Trait implementation blocks is `impl Eq(List (a)) given Eq(a) where` as an unification of the `impl` blocks
 
 ## Advanced Syntactic forms
 - `:` (colon) -- type annotation. Universal, after any expression (Everything is an expression).
@@ -163,10 +176,10 @@ These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the T
 
 ## Experimental
 - `= function` syntax with pattern-matching on the last argument from Ocaml
-- GAT (Generalized Associated Methods) from Rust
-- `impl ... for ...` -- Rust-like implementation blocks *ONLY* for associated Trait methods.
+- GAT (Generalized Associated Methods) from Rust using the `impl` blocks for defining `methods` (with an implict argument) and associated functions (explicit argument).
+- `impl ... given ... where` -- Rust-like implementation blocks *ONLY* for Trait implementations (the functions and methods).
 - `ext <Trait> with` -- for Scala3-like extension methods
-- `[for i in Blah]` -- Monadic Comprehensions from Scala3
+- `[i in Blah suchThat]` -- Monadic Comprehensions (for-comprehension) from Scala3
 
 Ideally, we want to "borrow" all the *declarative* syntactic forms, especially those which mimic the traditional mathematical notation.
 
@@ -185,3 +198,4 @@ Ideally, we want to "borrow" all the *declarative* syntactic forms, especially t
 - From Haskell import the module syntax, with `where` keyword and explicit exports.
 - From Scala3 import *Trait extension syntax* `ext <trait> with` (here  `with` is a perfect fit)
 - From Scalatest import *declarative* testing DSLs and the syntactic tricks to achieve similar clarity.
+
