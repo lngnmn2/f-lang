@@ -1,201 +1,84 @@
-
 # The Principles ("set in stone")
 
-The main goal is to arrive at a unified syntax, inspired by both the classic FP languages (SML, Erlang, Haskell, Ocaml) as well as the modern languages (F#, Scala3, Rust).
-The *main principle* is to use traditional *declarative* mathematical notation at the *Type-level*, and the syntax which is best suited for defining functions by clauses, function composition and uniform pattern mathing at the level of code.
-The canonical examples are the unified `type` keyword from F# and unified `let` binding from F#, which both rely on indentation.
-Since we use indentation to determine the structure of complex (nested) expressions, we can use the traditional (neatly perfect) Common-Lisp macro system syntactic special forms with just four minimal tokens: "' , ,@ `".
+The *main principle* is to use traditional *declarative* mathematical notation at the *Type-level*, and the syntax which is best suited for defining functions by clauses, function composition, and uniform pattern matching at the level of code.
 
-At the very fundamental level, we use so-called *Trinity* to denote **both**, the proper *Algebraic Data Types* (at the type-level), and the corresponding *"dual" nested structure* at the code level (clauses for clauses in sum-types, compounds for product-types).
-We use `->` ("maps to") only in the context of mapping (both at the type-level and in the code), and parenthesis only for defining the precedence and grouping (exactly as in the traditional mathematical notation).
-In general, we want to use the mathematical notation symbols with the exact meaning they have in math. We also want to use common "words" of mathematical language ("such that", "given", "where") with their traditional well-defined meaning.
+## 1. The Trinity (Universal Constructs)
 
-## The Trinity
-- `|` (*OR*, fork)-- a Universal, most abstract and general Algebraic Sum Type
-- `,` (*AND*, join) -- a Universal, most abstract and general Algebraic Product Type
-- `->` (*IMPLY*, maps to, step) - a Universal, most abstract and general Step (in a particular direction)
+We desugar High-Level types to these three Universal constructs:
 
-We desugar to just these Universal constructs (most basic structural elements of a DAG).
+*   `|` : **OR** (Sum Type, Fork)
+*   `,` : **AND** (Product Type, Join)
+*   `->` : **MAPS TO** (Step, Implication, Flow)
 
-### Universal unbound Nesting
-- `|` and `,`, as well as `->` can be *naturally* (I am serious) *nested*, and this is how **Nested** Algebraic Types are defined (desugar to).
-- Haskell nicely defines a Tuple type `(,)`, and has a whole sophisticated machinery to be able to do so. We resist the temptation.
+### Algebraic Data Types
+*   `|`, `,`, and `->` are built-in. Every occurrence denotes the corresponding Algebraic Data Type.
+*   **Nesting**: These can be naturally nested to define complex types.
 
-### Algebraic Data Types are built-in.
-- `|`, `,` and `->` (**maps to**) are 'built-in' (in the fabric of Reality).
-- Every occurrence of any of these symbols denote a corresponding proper Algebraic Data Type.
+## 2. Syntax & Structure
 
-We desugar ADTS to just there Universal Types.
+### Indentation
+*   Everything is an expression reducing to a value.
+*   Indentation is used to define code block-structure and scope.
 
-### Indentation 
-- Everything is an expresssion, which denotes a value it is reducible to.
-- We use indentation to define and express code block-structure (expressions).
-
-### Minimal uniform syntax
-- A Clause is an ultimate building block of the uniform, minimalist syntax, used consistently with indentation. No extra symbol or keyword clutter.
-- When we are defining a function we shall prefer clauses. When we use clauses we should not use match or case, just clauses and |. The rule is to prefer the uniform and minimalist clausal  │ │   notation whenever possible, and reverse the "full" match or case expressions ONLY for special cases.
-- Prefer minimalist syntax in defining function clause -- use only `|` and indentation.
-- Anonymous Clauses shall be used in Comprehensions, as they are used in matching expression (defining individual "branches")
+### The Clause
+*   The **Clause** is the fundamental building block.
+*   Syntax: `| pattern -> body`
+*   **Rule**: Prefer uniform, minimalist clausal notation. Use `|` and indentation over keywords like `match` or `case` where possible.
 
 ### Unified Syntax
-- `f x`: Function application is a juxtaposition.
-- Currying is *Universal* - every function is a curried function, every application is of a curryed function (partial or fully saturated).
-- `x shallBe 2`: Haskell style backticks to turn a function into an *infix* form.
-#### Graph structure (forks)
-- `<var> | p -> e | ...`: Generalized clausal mapping of muptiple "possible paths" (branches, arms).
-- `let f | p -> e | ...`: Functions as clausal set of mappings (distinct partial functions).
-- `if p then a else b`: Syntactic sugar for clausal (structural) definition of multiple possible branches `<predicate> | True ... | False ...` (otherwise).
+*   **Application**: `f x` (Juxtaposition).
+*   **Currying**: Universal. Every function is curried.
+*   **Infix**: `x \`shouldBe\` 2` (Backticks turn a function into infix).
+*   **Graph Structure**:
+    *   `<var> | p -> e | ...` (Generalized clausal mapping).
+    *   `if p then a else b` desugars to `p | True -> a | False -> b`.
 
-### Mathematical Integrity
--   `->`: Only for curried signatures and mappings.
--   `,`: Only for product types and data.
--   `|`: Only for sum types and clausal branching. 
+## 3. Type-Level Syntax
 
-### Functions defined by Clauses
-- The prefered form (shape) must be `let <function_name> | <patterns> -> <body> | <patterns> -> <body>` -- exactly the **Uniform** Anonymous Mapping syntax
-- This form is shared with the generalized pattern-matching -- an individual (or single) Clause syntax. This is the most crucial part.
-- Ocaml's specialized `function` expression, which pattern-matches on the implicit last argument is the inspiration for Anonymous Clauses.
+*   **Arrows (`->`)**: strictly for Curried Function type signatures (`A -> B -> C`).
+*   **Commas (`,`)**: strictly for Product Types / Tuples (`A, B`).
+*   **Constructors**:
+    *   **Type-Constructors**: Capitalized (e.g., `List`, `Map`).
+    *   **Data-Constructors**: Capitalized (e.g., `True`, `Just`).
 
-### The arrow
-- In mathematics the `->` arrows used to denote an anonymous *mapping*, i.e. `x -> x + 1` with a well-defined meaning "x maps to".
-- `->` traditionally stands for *maps to*, so its use *ONLY* in the Curried Functions type-signatures is justified.
-- The classic Haskell use of the arrow `->` in the Lambda Notation -- `\x -> \y -> x + y` is the only way to denote Currying properly.
-- It is also used with individual Clauses in pattern-matching expressions, which semantically is exactly an anonymous mapping.
+## 4. Traits and Implementations
 
-These must be the *ONLY* uses, to remove clutter and ambiguity. One use at the Type-level, and two uses at the level of Code.
+*   **Keywords**: `trait`, `impl`, `given`, `where`.
+*   **Trait Definition**: `trait Name(param) suchThat <bounds> where ...`
+*   **Implementation**: `impl Trait(Type) given Context where ...`
+    *   **Syntax Rule**: `impl Eq(List a) given Eq(a) where`
+    *   Replaces `=>` with `given` and reverses the order (Constraint follows the Type).
+*   **Bounds**: `<:` (Subtrait/Lower bound) and `>:` (Supertrait/Upper bound).
 
-### Direction
-- A direction of a DAG is not arbitrary and cannot be reversed on a whim, just because that would be a structural "dual".
-- Direction "Naturally" arise from the flow of implications (connecting every single step). Implications are not reversible (have no inverse).
-- Direction is implicit (and is necessary) in any "fork", it is part of the element's intrinsic "structure".
+## 5. Mathematical Integrity
 
-## The Clauses
-- An Universal Implication (Modus Ponens) can be informally denoted as a single IF-THEN clause -- "If This (is true) Then That (must be true)".
-- Some functions can be defined as a set (disjoint union) of individual clauses, so that each clause is "naturally" defines a *partial function*, thus partitioning the domain.
-- A Sum-Type is indeed a set (a disjoint union) of individual clauses, which formalizes the explicit partitioning of the domain.
-- Pattern-matching expressions on Sum-Types or results of Partial Functions have the particular shapes which are "structural duals".
-- It follows that a (single) clause (which denotes a single **arrow**) is the most abstract and most general, universal building block.
-- The "Nested lets are nested lambdas with an in-place application" -- the famous structural isomorphism can be reduced to clauses.
+*   `suchThat`: Denotes mathematical equations / Trait bounds (Equational Reasoning).
+*   `where`: Denotes code bindings / Local Environment.
+*   `andAlso` / `orElse`: Logical connectives.
 
-## The homage to mathematical notation
-- ` ` (space) -- function application (juxtaposition). The finest structural element of any written human language. This is also "naturally" denotes Partial Application.
-- `=` (the equal sign) -- an immutable binding. We are not Platonists -- not mere ideas in a vacuum. The notion of an persistent **Environment** is necessary.
-- `()` (parenthesis) -- *ONLY* for precedence (explicit nesting) and explicit grouping, just as in mathematics.
-- `suchThat` (a keyword) -- denotes a refinement -- nested predicates, as in the classic Set-comprehension notation.
-- `where` (a keyword) -- denotes a nested set of bindings, which implicitly defines terms before they are being used.
-- `let` (a keyword) -- reduces cognitive burden by uniformly unifying all the binding sites.
-- `with` (a keyword) -- a better 'word' to denote the Universal **Set Union** operation (at the level of abstract interfaces)
-- `'` (single quote) -- a prime, as in `let f' = ... in ...`
+## 6. Advanced Forms
 
-## Currying and Partial application
-- Uniformity (unification): Every function, including Type-Constructors, is "really" a single-argument `lambda` and every function application is of a curried function (partial or complete).
-- Every multi-argument Type-Signature is a Curried signature with `->` *arrows* between argument types.
-- Just as in SML or Haskell `f x y` is semantically equal to `\x -> \y ->`
-- Clearly captures the notion of a "partially filled enzyme", or just "Not all necessary and sufficient conditions are meet yet" for a reaction to proceed.
-- Currying and Partial Application unifies the single-argument `lambda` expression, and with implicit nesting it captures the notion of "arrows going in".
-- There is another fundamental view -- "under-application" is a "suspension", while "over-application" is an implicit recursion.
+### Monadic Comprehensions
+*   **Delimiters**: `[` and `]` are reserved **exclusively** for comprehensions.
+*   **Binding**: `<-` is reserved for monadic binding within these blocks.
+*   **Macros**: Classic Lisp-style macros (`'`, `` ` ``, `,`, `,@`) are allowed **only** within comprehension blocks.
 
-## The Class-instance, Trait-impl dilemma
-- `class` (keyword) -- Haskell's notation for **Type-Classes**. Consistent with Predicate Logic but implies hierarchy.
-- `instance` (keyword) -- Denotes a particular instance. Beautiful, but we choose unification.
-- `trait` + `impl` -- **SELECTED**. Decoupled from the implicit notion of a rigid class hierarchy (The **Set-Subset** relation) to a **Set-Union** operation.
-- We substitute `trait` for class and `impl` for instance to emphasize the compositional nature.
-- the syntax for Trait implementation blocks is `impl Eq(List (a)) given Eq(a) where` as an unification of the `impl` blocks
+### Imperative Forms
+*   `{}`: Imperative blocks.
+*   `;`: Explicit delimiter.
+*   `:=`: Destructive assignment.
 
-## Advanced Syntactic forms
-- `:` (colon) -- type annotation. Universal, after any expression (Everything is an expression).
-- `...` (triple dot) -- and so on
-- `1..5` (standard range notation)
+### Annotations & Ranges
+*   `:`: Type annotation (`x : Int`).
+*   `...`: Ellipsis.
+*   `1..5`: Range.
 
-## Tribute to SML/NJ (and Mlton)
-- The uniform clause syntax for defining functions by clauses (|) (without the `fun` keyword).
-- `andAlso` (a keyword) for short-circuiting logical Connective **AND** in the Predicate Logic sections.
-- `orElse` (a keyword) for short-circuiting logical Connective **OR** in the Predicate Logic sections.
-- `suchThat` (a keyword) for a set of Predicate that follow
+## 7. Style & Conventions
 
-## Type-Level Syntax
-- `->` (an arrow) must be used in Type-Signatures (of Curried functions)
-- `,` (a comma) must be used for an in-place Product Type definition
+*   **Maybe** (`Just | Nothing`) over Option.
+*   **Result** (`Ok | Err`) over Either.
+*   **Naming**: Consistent capitalization for Types/Constructors, lowercase for functions/variables.
 
-### Constructors
-- Capitalized Type-Names (Type-Constructors).
-- Capitalized Sum-Type clauses (Data-Constructors and implicit "type-tags").
-
-### Traits
-- Capitalized Trait-Names (Abstract Data Types).
-- Capitalized named Trait-Bounds (Type-Level predicates).
-- The **Trait-Subtrait** relation shall be expressed with `<:` and `>:` since Traits could, in theory, have a "lower" and "upper" bounds.
-- Trait Bounds are just type-level Equations (Equational Reasoning)
-
-## Disambiguation
-- Every function is uniformly (potentially) a Curried Function, including parameterized Type-Constructors and Data-Constructors.
-- In Trait definitions we use `->` instead of `,` ONLY for type-signatures of Curried Functions (this is a nasty kludge).
-- Trait bounds has to be specified *before* the where clause, simply because mathematical constraints comes prior to code.
-- We say `suchThat` when what follows are mathematical equations -- statements of truth. **Logical Constraints** (required predicates), complex **Trait-Bound** (mathematical equations).
-- In general, we use `suchThat` when we write mathematics (equational reasoning), and we use `where` when we write the code (binding in the Environemnt).
-- At the **Type-Level** we naturally use `suchThat`
-
-## Style
-- `Maybe` instead of `Option` -- `Just a | Nothing` is much more classy than `Some a | None`
-- `Result` instead of `Either` -- `Left | Right` are a disgrace. 
-- Either can be defined for compatibility, as well as Option, as type-aliases (`where Some a = Just a`, etc).
-
-## The core syntactic forms
-- Haskell style generic and uniform multi-clause  `case <boolean exoression> of  <expression> `
-- `if` is a syntactic sugar for exactly two-clause `case` with required `else` clause.
-- `when` is a single-clause `case` without an `else` clause
-- Generalized and uniform multi-clause `match | <pattterns> -> <body> | <pattern> -> <body> ... `
-- A function defined by clauses has the same syntax and semantics as `match` multi-clause expression. It desugars into "a single match-body" function.
-- Maybe should generalize to just one single generalized `match` expression, and case being its specialization.
-
-## Monadic Comprehensions (inspired by Scala3)
-- `[]` the square brackets must be ONLY used as distinct delimiters for Comprehension blocks (an embedded specialized DSL).
-- `<-` shall be used only within the Comprehension blocks for monadic "binding".
-- We do not want to look like Scala syntax, we only want individual features which enchance *declarative* expressiveness of the syntax.
-
-## The simple Classic LISP macro system
-- Macros can *ONLY* be used inside the Monadic Comprehension Blocks.
-- The classic Lisp Meta-syntax - quote, unquote, quote-splicing, backquote.
-- `'` strictly denotes quote (literal) within Comprehension blocks.
-- `` ` `` strictly denotes quasiquote (template) within Comprehension blocks.
-- `,` comma strictly denotes unquote within the Comprehension blocks.
-- `,@` is unquote-splicing form the simple macro system
-- String literals are *ONLY* in double quotes.
-
-## Declarative Testing 
-- Philosophy: Tests are just *declarative* specification of constraints (ideally, with equations) using Monadic Comprehensions blocks.
-- Comprehensions + Lisp-like Macros form a minimal **Declarative** DSL for rigorous testing.
-- We want syntactic sugar with carefully chosen semantics (Monadic Comprehension) which allow us to mimic Scalatest embedded declarative testing DSLs embedded into a library.
-- The testing library shall be written together with prelude and strdlib (implementing the minimal set of required features for testing library *FIRST*).
-- Having declarative testing library as the top priority, even before prelude is stabilized, is the key point of properly applying TTD and XP practices and processes.
-
-## Imperative syntactic forms
-- `{}` (curly braces) -- imperative blocks, Haskell's *do-notation*
-- `;` (semicolon) -- imperative explicit delimiter
-- `:=` (colon-equal) -- imperative assignment (a destructive over-write)
-
-## Experimental
-- `= function` syntax with pattern-matching on the last argument from Ocaml
-- GAT (Generalized Associated Methods) from Rust using the `impl` blocks for defining `methods` (with an implict argument) and associated functions (explicit argument).
-- `impl ... given ... where` -- Rust-like implementation blocks *ONLY* for Trait implementations (the functions and methods).
-- `ext <Trait> with` -- for Scala3-like extension methods
-- `[i in Blah suchThat]` -- Monadic Comprehensions (for-comprehension) from Scala3
-
-Ideally, we want to "borrow" all the *declarative* syntactic forms, especially those which mimic the traditional mathematical notation.
-
-## Summary (incomplete)
-- from F# import uniform type declatation syntax (`type`)
-- from F# import uniform let identation-based syntax (`let`)
-- from Ocaml import `= function` specialized syntax
-- From SML import uniform function defintion by clauses, using `|` as delimiter
-- From Erlang import definiton by clauses and uniform pattern-matching 
-- From Haskell import `case` expression with uniform patter-matching and `|` as clause delimiter
-- From Scala3 import Monadic comprehension with pattern-matching, and match failure as a filter.
-- From  Haskell import list-comprehension syntax which uses square brackets.
-- From Hakell import backtick syntax, which turn a binary function into an infix form `shouldBe`.
-- From Haskell import type-classes and instances syntax, substituting `trait` for class and `impl` for instance.- From Rust import `impl` blocks for associated methods definition (EXPERIMENTAL).
-- From Haskell import Capitalized Type-constructors and Data-constructors
-- From Haskell import the module syntax, with `where` keyword and explicit exports.
-- From Scala3 import *Trait extension syntax* `ext <trait> with` (here  `with` is a perfect fit)
-- From Scalatest import *declarative* testing DSLs and the syntactic tricks to achieve similar clarity.
-
+## 8. Experimental Features
+*   `extension` syntax: `extension (List a) { ... }` (or similar, mimicking Scala 3).
+*   `macro`: Hygienic macro definitions.

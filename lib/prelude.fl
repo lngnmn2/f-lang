@@ -246,10 +246,10 @@ let sequence list
 let mapM f, list = sequence (map f, list)
 let mapM_ f, list | Nil -> pure Unit | Cons (x, xs) -> f x >> mapM_ f, xs
 
-impl Show a for Show (List a) where
+impl Show a => Show (List a) where
     show list = "[" ++ (intercalate ", ", (map show, list)) ++ "]"
 
-impl Eq a for Eq (List a) where
+impl Eq a => Eq (List a) where
     equals l1, l2
         | Nil, Nil -> True
         | Cons (x, xs), Cons (y, ys) -> (x == y) && (equals xs, ys)
