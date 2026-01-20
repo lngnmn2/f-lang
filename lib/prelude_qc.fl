@@ -1,0 +1,75 @@
+module PreludeQC where
+
+import Prelude
+import QuickCheck
+
+-- ============================================================================
+-- 1. Boolean Properties
+-- ============================================================================
+
+let prop_doubleNeg b = not (not b) == b
+let prop_andComm b1 b2 = (b1 && b2) == (b2 && b1)
+let prop_orComm b1 b2 = (b1 || b2) == (b2 || b1)
+let prop_deMorgan1 b1 b2 = not (b1 && b2) == (not b1 || not b2)
+
+-- ============================================================================
+-- 2. Integer Properties
+-- ============================================================================
+
+let prop_plusComm x y = (x + y) == (y + x)
+let prop_plusAssoc x y z = ((x + y) + z) == (x + (y + z))
+let prop_mulDist x y z = (x * (y + z)) == ((x * y) + (x * z))
+
+-- ============================================================================
+-- 3. List Properties
+-- ============================================================================
+
+let prop_revRev xs = reverse (reverse xs) == xs
+
+let prop_revApp xs ys = 
+    reverse (xs ++ ys) == (reverse ys ++ reverse xs)
+
+let prop_mapId xs = map id xs == xs
+
+let prop_lengthApp xs ys =
+    length (xs ++ ys) == length xs + length ys
+
+-- ============================================================================
+-- Main Test Suite
+-- ============================================================================
+
+let runTests = do
+    putLine "================================================================================"
+    putLine "Running F-lang Prelude Validation Suite (QuickCheck)"
+    putLine "================================================================================"
+
+    putLine "\n[Boolean Logic]"
+    putStr "  Double Negation: "
+    quickCheck 100 (forAll (arbitrary : Gen Bool) prop_doubleNeg)
+    putStr "  AND Commutativity: "
+    quickCheck 100 (forAll2 (arbitrary : Gen Bool) arbitrary prop_andComm)
+    putStr "  OR Commutativity: "
+    quickCheck 100 (forAll2 (arbitrary : Gen Bool) arbitrary prop_orComm)
+    putStr "  De Morgan (NOT AND): "
+    quickCheck 100 (forAll2 (arbitrary : Gen Bool) arbitrary prop_deMorgan1)
+
+    putLine "\n[Integer Arithmetic]"
+    putStr "  Addition Commutativity: "
+    quickCheck 100 (forAll2 (arbitrary : Gen Int) arbitrary prop_plusComm)
+    putStr "  Addition Associativity: "
+    quickCheck 100 (forAll3 (arbitrary : Gen Int) arbitrary arbitrary prop_plusAssoc)
+    putStr "  Distributivity (* over +): "
+    quickCheck 100 (forAll3 (arbitrary : Gen Int) arbitrary arbitrary prop_mulDist)
+
+    putLine "\n[List Operations (List Int)]"
+    putStr "  Reverse Involutive: "
+    quickCheck 50 (forAll (arbitrary : Gen (List Int)) prop_revRev)
+    putStr "  Map Identity: "
+    quickCheck 50 (forAll (arbitrary : Gen (List Int)) prop_mapId)
+    putStr "  Reverse Append: "
+    quickCheck 50 (forAll2 (arbitrary : Gen (List Int)) arbitrary prop_revApp)
+    putStr "  Length Append: "
+    quickCheck 50 (forAll2 (arbitrary : Gen (List Int)) arbitrary prop_lengthApp)
+
+    putLine "\n================================================================================"
+    putLine "Prelude Verified."

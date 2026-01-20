@@ -1,0 +1,61 @@
+module FSpec where
+
+import Prelude
+
+-- 1. Test Result Type
+type TestResult
+    | Passed
+    | Failed String
+
+-- 2. Core Assertions
+
+-- | Expect equality
+infix let shouldBe actual expected
+    where Eq a, Show a
+    | actual == expected -> Passed
+    | _                  -> Failed ("Expected " ++ (show expected) ++ ", but got " ++ (show actual))
+
+-- | Expect inequality
+infix let shouldNotBe actual expected
+    where Eq a, Show a
+    | actual != expected -> Passed
+    | _                  -> Failed ("Did not expect " ++ (show expected))
+
+-- 3. Macro Assertions (Declarative Checks)
+
+-- | Macro: check `(expr)
+-- Evaluates the boolean expression. If false, reports the stringified code.
+macro check cond_expr = 
+    `(if ,cond_expr 
+      then Passed 
+      else Failed ("Check failed: " ++ (show ',cond_expr)))
+
+-- 4. Test Runner
+
+-- | Runs a named suite of tests
+-- | Returns: IO Bool (True if all passed)
+let runSpec suiteName tests = 
+    putLine ("\n📦 Suite: " ++ suiteName) >>
+    
+    let runTest result = 
+        result 
+            | Passed   -> putStr "." >> pure Nothing
+            | Failed m -> putStr "F" >> pure (Just m)
+    in 
+    
+    mapM runTest tests >>= \results ->
+    
+    -- Filter failures (Pure List processing)
+    let failures = [ msg | Just msg <- results ]
+    
+    putLine "" >>
+    
+    (failures
+        | Nil -> 
+            putLine "✨ All tests passed." >> 
+            pure True
+        | _ -> 
+            putLine ("💥 " ++ (show (length failures)) ++ " failures detected:") >>
+            mapM_ (\err -> putLine ("  - " ++ err)) failures >>
+            pure False
+    )
