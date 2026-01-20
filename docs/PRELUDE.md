@@ -1,134 +1,68 @@
-# F-Lang Prelude: Standard Library Fundamentals
+# The Standard Prelude
 
-This document outlines the core types and traits of the F-Lang Standard Library.
+The F-Lang Prelude defines the core types, traits, and functions available in every program. It serves as the foundation for the language's ecosystem, providing a minimal yet powerful set of abstractions.
 
-## 1. Basic Types
+## Core Types
 
-We define the fundamental algebraic data types using clausal syntax.
+### Primitive Types
+*   `Bool`: True | False
+*   `Int`: 64-bit Signed Integer
+*   `Double`: 64-bit IEEE 754 Float
+*   `Char`: Unicode Scalar Value
+*   `String`: UTF-8 String
+*   `Unit`: ()
 
+### Algebraic Data Types
+*   `Maybe a`: Represents an optional value (`Just a | Nothing`).
+*   `Result a e`: Represents a value or an error (`Ok a | Err e`).
+*   `List a`: A homogeneous linked list (`Nil | Cons (a, List a)`).
+*   `IO a`: An effectful computation returning `a`.
+
+## Fundamental Traits
+
+### Eq (Equality)
 ```haskell
--- Optional values
-type Maybe a
-    | Just a
-    | Nothing
-
--- Error handling
-type Result a e
-    | Ok a
-    | Err e
-
--- Compatibility Aliases
-let Either = Result
-let Left   = Err
-let Right  = Ok
-```
-
-## 2. Recursive Types
-
-Recursive structures demonstrate the composition of sum and product types.
-
-```haskell
--- Linked List
-type List a
-    | Nil
-    | Cons (a, List a)
-
--- Functorial Map for List
-let map f list =
-    list
-        | Nil          -> Nil
-        | Cons (x, xs) -> Cons (f x, map f xs)
-```
-
-## 3. Core Traits
-
-The `Monad` trait defines the sequencing of computational flows.
-
-```haskell
-trait Monad m
-    pure : a -> m a
-    bind : m a -> (a -> m b) -> m b
-
--- Instance for Result
-instance Monad (Result a e)
-    where
-        pure x = Ok x
-        bind res f =
-            res
-                | Ok x  -> f x
-                | Err e -> Err e
-```
-
-## 4. Monadic Structures
-
-### Reader (Environment)
-Models access to an immutable environment.
-
-```haskell
-type Reader r a
-    | Reader (r -> a)
-
-let ask = | r -> r
-let run reader r = 
-    let Reader f = reader
-    f r
-```
-
-### State (Persistent)
-Models state transformation via a persistent DAG.
-
-```haskell
-type State s a
-    | State (s -> (a, s))
-
-instance Monad (State s a)
-    where
-        pure x = State ( \s -> (x, s) )
-        bind stateM f = State ( \s -> 
-            let State g = stateM
-            let (val, nextState) = g s
-            let State h = f val
-            h nextState )
-```
-
-## 5. Numeric Traits
-
-Numeric types support arithmetic operations and can be refined.
-
-```haskell
-type Ordering | LT | EQ | GT
-
 trait Eq a where
-    equals : a -> a -> Bool
-
-trait Ord a where
-    compare : a -> a -> Ordering
-
--- Implementation for Int
-instance Ord Int where
-    compare x y =
-        (x < y)
-            | True  -> LT
-            | False -> 
-                (x == y)
-                    | True  -> EQ
-                    | False -> GT
-
-trait Num a
-    plus  : a -> a -> a
-    minus : a -> a -> a
-    times : a -> a -> a
-
--- Real math using suchThat to prevent undefined behavior
-trait Floating a
-    where | _ -> Num a
-    div : a -> (a suchThat val != 0) -> a
+    equals : a, a -> Bool
+    infix let (==) = equals
+    infix let (!=) x, y = not (equals x, y)
 ```
 
-## Summary
+### Ord (Ordering)
+```haskell
+trait Ord a where Eq a
+    compare : a, a -> Ordering
+    infix let (<) x, y  = (compare x, y) == LT
+    -- ... (<=, >, >=)
+```
 
-| Module | Concept | Representation |
-| :--- | :--- | :--- |
-| **Logic** | Choice (`|`) | `Maybe`, `Result`, `Ordering` |
-| **Data** | Parallel (`,`) | `List`, `Product`, `State` |
-| **Control** | Flow (`->`) | `Monad`, `Reader`, `Math` |
+### Show (String Conversion)
+```haskell
+trait Show a where
+    show : a -> String
+```
+
+## Monadic Hierarchy
+
+The Prelude defines the standard hierarchy of monadic traits:
+1.  `Functor`: Mappable structures.
+2.  `Applicative`: Function application within a context.
+3.  `Monad`: Sequential composition of effectful computations.
+4.  `Alternative`: Associative binary operation and identity (empty).
+
+## Standard Implementations
+
+The Prelude includes implementations for all core types:
+
+```haskell
+-- List
+impl Functor(List a) where ...
+impl Monad(List a) where ...
+impl Show(List a) given Show(a) where ...
+
+-- Result
+impl Monad(Result a e) where ...
+
+-- IO
+impl Monad(IO) where ...
+```

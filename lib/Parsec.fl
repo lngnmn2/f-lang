@@ -1,101 +1,113 @@
-mod Parsec where
+-- A Simple Parser Combinator Library (Parsec)
+-- Implements a monadic parser with basic combinators.
+-- Based on the "Functional Pearl" and Haskell's Parsec.
 
--- Primitives (to be supplied by VM/Compiler magic later, assumed here)
--- In a real scenario, these would be 'extern' or 'primitive'
-let unconsStr s = primUnconsStr s -- String -> Maybe (Char, String)
-let eqChar c1 c2 = primEqChar c1 c2 -- Char, Char -> Bool
+module Parsec where
 
--- The Parser Type
--- A parser is a function from String to a List of (Result, RemainingString)
--- We use List for non-determinism (Alternative), though typically we want Result for error messages.
+import Prelude
+
+-- 1. The Parser Type
+-- A parser is a function that takes an input string and returns
+-- a list of possible parses (Result, Remaining Input).
 -- For a "Simple" Parsec, we'll use Result for success/failure, but List is better for backtracking.
--- Let's stick to the classic: String -> List (a, String) to fully support Alternative properly.
--- Wait, 'Result' in our Prelude is Ok/Err. 
--- Let's use: type Parser a = String -> Result (a, String) String
+-- Here we use explicit List-of-results to model non-determinism (AMBIGUITY).
+
+type ParseResult a | ParseResult (List (a, String))
+
+type Parser a | Parser (String -> ParseResult a)
+
+let runParser p, input | Parser f -> f input
+
 -- This supports simple LL(1) style without complex backtracking state, but we can implement 'try' manually if needed.
 
-type Parser a =
-    | P (String -> Result (a, String) String)
+-- 2. Instances
 
-let runParser p input =
-    | P f, s -> f s
+impl Functor(Parser) where
+    map f, p | Parser run ->
+        Parser (\input ->
+            match (run input)
+            | ParseResult res ->
+                -- res is List (a, String)
+                -- we map over the list results
+                ParseResult (map (\(v, s) -> (f v, s)), res)
+        )
 
--- Functor
-impl Functor Parser where
-    map f parser =
-        let P p = parser
-        P ( \s -> 
-            map ( \ (x, s') -> (f x, s') ) (p s) )
+impl Applicative(Parser) where
+    pure x = Parser (\s -> ParseResult (Cons ((x, s), Nil)))
+    
+    apply pf, px | Parser runF, Parser runX ->
+        Parser (\s ->
+            match (runF s)
+            | ParseResult fs ->
+                -- fs : List (a -> b, String)
+                -- We need to flatMap over fs
+                let processF fPair 
+                    | (f, s1) -> 
+                        match (runX s1)
+                        | ParseResult xs -> map (\(x, s2) -> (f x, s2)), xs
+                
+                -- concat (map processF fs)
+                ParseResult (bind fs, processF)
+        )
 
--- Applicative
-impl Applicative Parser where
-    pure x = P ( \s -> Ok (x, s) )
-    apply parserF parserX =
-        let P pf = parserF
-        let P px = parserX
-        P ( \s ->
-            bind (pf s) ( \ (f, s') ->
-                bind (px s') ( \ (x, s'') ->
-                    Ok (f x, s'') ) ) )
+impl Monad(Parser) where
+    bind p, k | Parser run ->
+        Parser (\s ->
+            match (run s)
+            | ParseResult res ->
+                -- res : List (a, String)
+                let processResult r
+                    | (x, s1) ->
+                        let Parser runK = k x
+                        let ParseResult resK = runK s1
+                        resK
+                
+                ParseResult (bind res, processResult)
+        )
 
--- Monad
-impl Monad Parser where
-    bind parser k =
-        let P p = parser
-        P ( \s ->
-            bind (p s) ( \ (x, s') ->
-                runParser (k x) s' ) )
+impl Alternative(Parser) where
+    empty = Parser (\_ -> ParseResult Nil)
+    
+    alt p1, p2 | Parser run1, Parser run2 ->
+        Parser (\s ->
+            match (run1 s)
+            | ParseResult r1 ->
+                match (run2 s)
+                | ParseResult r2 ->
+                    ParseResult (append r1, r2)
+        )
 
--- Alternative (Choice)
-impl Alternative Parser where
-    empty = P ( \_ -> Err "Empty" )
-    alt p1 p2 =
-        let P run1 = p1
-        let P run2 = p2
-        P ( \s ->
-            (run1 s)
-                | Ok res -> Ok res
-                | Err _  -> run2 s )
+-- 3. Basic Combinators
 
--- Core Combinators
+let item = Parser (\s ->
+    match (primStringToList s) -- Hypothetical primitive
+    | Nil -> ParseResult Nil
+    | Cons (c, cs) -> ParseResult (Cons ((c, primListToString cs), Nil))
+)
 
-let satisfy predicate = P ( \s ->
-    (unconsStr s)
-        | Just (c, rest) suchThat predicate c -> Ok (c, rest)
-        | Just (c, _) -> Err "Unexpected char"
-        | Nothing -> Err "Unexpected EOF" )
+let sat p =
+    bind item, \x ->
+    if p x then pure x else empty
 
-let char c = satisfy (eqChar c)
+let char c = sat (\x -> x == c)
 
 let string s =
-    (unconsStr s)
-        | Just (c, rest) -> 
-            bind (char c) ( \_ -> 
-                bind (string rest) ( \_ -> 
-                    pure s ) )
-        | Nothing -> pure ""
+    match (primStringToList s)
+    | Nil -> pure ""
+    | Cons (c, cs) -> char c >> string (primListToString cs) >> pure s
 
 let many p =
-    alt ( some p ) ( pure Nil )
+    alt (some p) (pure Nil)
 
 let some p =
-    bind p ( \x ->
-        bind (many p) ( \xs ->
-            pure (Cons (x, xs)) ) )
+    bind p, \x ->
+    bind (many p), \xs ->
+    pure (Cons (x, xs))
 
-let eof = P ( \s ->
-    (unconsStr s)
-        | Nothing -> Ok ((), s)
-        | Just _  -> Err "Expected EOF" )
+-- 4. Utility
 
--- Useful Utilities
-
-let option default p = alt p (pure default)
-
-let choice ps = foldr alt empty ps
-
-let between open close p =
-    bind open ( \_ ->
-        bind p ( \x ->
-            bind close ( \_ ->
-                pure x ) ) )
+let parse p, input =
+    match (runParser p, input)
+    | ParseResult Nil -> Left "No parse"
+    | ParseResult (Cons ((x, ""), _)) -> Right x -- Full consumption preferred
+    | ParseResult (Cons ((x, rest), _)) -> Right x -- Partial match

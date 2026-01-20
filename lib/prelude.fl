@@ -195,32 +195,32 @@ let guard cond
 -- ============================================================================
 
 -- IO Instance (Built-in binding)
-impl Functor IO where
+impl Functor(IO) where
     map f, io = bindIO io, (\x -> returnIO (f x))
 
-impl Applicative IO where
+impl Applicative(IO) where
     pure = returnIO
     apply f_io, x_io = bindIO f_io, (\f -> bindIO x_io, (\x -> returnIO (f x)))
 
-impl Monad IO where
+impl Monad(IO) where
     bind = bindIO
 
 -- Result Instances
-impl Functor (Result a, e) where map f, res | Ok x -> Ok (f x) | Err e -> Err e
-impl Applicative (Result a, e) where
+impl Functor(Result a, e) where map f, res | Ok x -> Ok (f x) | Err e -> Err e
+impl Applicative(Result a, e) where
     pure x = Ok x
     apply pf, px | Ok f -> map f, px | Err e -> Err e
-impl Monad (Result a, e) where bind res, f | Ok x -> f x | Err e -> Err e
+impl Monad(Result a, e) where bind res, f | Ok x -> f x | Err e -> Err e
 
 -- Maybe Instances
-impl Functor Maybe where
+impl Functor(Maybe) where
     map f, m | Just x -> Just (f x) | Nothing -> Nothing
-impl Applicative Maybe where
+impl Applicative(Maybe) where
     pure = Just
     apply pf, px | Just f -> map f, px | Nothing -> Nothing
-impl Monad Maybe where
+impl Monad(Maybe) where
     bind m, f | Just x -> f x | Nothing -> Nothing
-impl Alternative Maybe where
+impl Alternative(Maybe) where
     empty = Nothing
     alt m1, m2 | Just x -> Just x | Nothing -> m2
 
@@ -246,54 +246,54 @@ let sequence list
 let mapM f, list = sequence (map f, list)
 let mapM_ f, list | Nil -> pure Unit | Cons (x, xs) -> f x >> mapM_ f, xs
 
-impl Show a => Show (List a) where
+impl Show(List a) given Show(a) where
     show list = "[" ++ (intercalate ", ", (map show, list)) ++ "]"
 
-impl Eq a => Eq (List a) where
+impl Eq(List a) given Eq(a) where
     equals l1, l2
         | Nil, Nil -> True
         | Cons (x, xs), Cons (y, ys) -> (x == y) && (equals xs, ys)
         | _ -> False
 
-impl Functor (List a) where
+impl Functor(List a) where
     map f | Nil -> Nil | Cons (x, xs) -> Cons (f x, map f, xs)
-impl Applicative (List a) where
+impl Applicative(List a) where
     pure x = Cons (x, Nil)
     apply fs, xs | Nil -> Nil | Cons (f, crest) -> append (map f, xs) (apply crest, xs)
-impl Monad (List a) where
+impl Monad(List a) where
     bind list, f | Nil -> Nil | Cons (x, xs) -> append (f x) (bind xs, f)
-impl Alternative (List a) where
+impl Alternative(List a) where
     empty = Nil
     alt xs, ys = append xs, ys
 
 -- Native Type Instances
-impl Show String where show s = s
-impl Show Char where show c = primCharToString c
+impl Show(String) where show s = s
+impl Show(Char) where show c = primCharToString c
 
-impl Eq Int where equals x, y = primEqInt x, y
-impl Ord Int where compare x, y = primCompareInt x, y
-impl Num Int where
+impl Eq(Int) where equals x, y = primEqInt x, y
+impl Ord(Int) where compare x, y = primCompareInt x, y
+impl Num(Int) where
     plus x, y = primAddInt x, y; minus x, y = primSubInt x, y; times x, y = primMulInt x, y
     negate x = primNegInt x; abs x = | x < 0 -> negate x | _ -> x; signum x = | x == 0 -> 0 | x < 0 -> -1 | _ -> 1
     fromInteger x = x
-impl Integral Int where
+impl Integral(Int) where
     quot x, y = primQuotInt x, y; rem x, y = primRemInt x, y
     div x, y = primDivInt x, y; mod x, y = primModInt x, y
     toInteger x = x
-impl Show Int where show i = primIntToString i
+impl Show(Int) where show i = primIntToString i
 
-impl Eq Double where equals x, y = primEqDouble x, y
-impl Ord Double where compare x, y = primCompareDouble x, y
-impl Num Double where
+impl Eq(Double) where equals x, y = primEqDouble x, y
+impl Ord(Double) where compare x, y = primCompareDouble x, y
+impl Num(Double) where
     plus x, y = primAddDouble x, y; minus x, y = primSubDouble x, y; times x, y = primMulDouble x, y
     negate x = primNegDouble x; abs x = primAbsDouble x; signum x = primSignumDouble x
     fromInteger i = primIntToDouble i
-impl Fractional Double where
+impl Fractional(Double) where
     divide x, y = primDivDouble x, y; recip x = 1.0 / x; fromRational x = x
-impl Floating Double where
+impl Floating(Double) where
     pi = 3.141592653589793; exp x = primExpDouble x; log x = primLogDouble x; sqrt x = primSqrtDouble x
     sin x = primSinDouble x; cos x = primCosDouble x; asin x = primAsinDouble x; acos x = primAcosDouble x; atan x = primAtanDouble x
-impl Show Double where show x = primDoubleToString x
+impl Show(Double) where show x = primDoubleToString x
 
-impl Eq Char where equals x, y = primEqChar x, y
-impl Ord Char where compare x, y = primCompareChar x, y
+impl Eq(Char) where equals x, y = primEqChar x, y
+impl Ord(Char) where compare x, y = primCompareChar x, y
