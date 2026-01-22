@@ -25,21 +25,22 @@ This document defines the F-Lang specification in a machine-readable JSON format
     {"symbol": "|", "role": "Sum (OR)", "precedence": 8},
     {"symbol": "andAlso", "role": "Short-circuit AND", "precedence": 9},
     {"symbol": "orElse", "role": "Short-circuit OR", "precedence": 9},
-    {"symbol": "<:", "role": "Subtrait Bound", "precedence": 10},
+    {"symbol": "<:", "role": "Subtrait Bound (Traditional)", "precedence": 10},
     {"symbol": ">:", "role": "Supertrait Bound", "precedence": 10},
     {"symbol": "where", "role": "Local Environment", "precedence": 11},
-    {"symbol": ":", "role": "Type Annotation", "precedence": 12},
+    {"symbol": ":", "role": "Type Annotation / Trait Supertype", "precedence": 12},
     {"symbol": ":=", "role": "Assignment", "precedence": 13},
     {"symbol": ";", "role": "Sequence", "precedence": 14}
   ],
   "keywords": {
     "definitions": ["type", "trait", "let"],
-    "constraints": ["where", "suchThat", "with"]
+    "constraints": ["where", "suchThat", "with", "given"]
   },
   "abstract_syntax_tree": {
     "Decl": {
       "TypeDef": ["Name", "Params", "Variants", "WhereClauses", "SuchThatClauses"],
-      "TraitDef": ["Name", "Param", "Signatures", "Defaults"],
+      "TraitDef": ["Name", "Param", "SuperTraits (via ':')", "Signatures"],
+      "ImplDef": ["Trait", "Type", "GivenConstraints (via '<:')", "Methods"],
       "Binding": ["Name", "Clauses"]
     },
     "Type": ["Var", "Constructor", "Product", "Sum", "Arrow", "Refined"],

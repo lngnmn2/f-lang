@@ -59,3 +59,35 @@ To maintain minimalism and ambiguity-free parsing:
 *   **Square Brackets**: Reserved strictly for comprehensions. Never used for type parameters or array indexing.
 *   **Type Parameters**: Use juxtaposition `List Order`. Parentheses `List (Order)` denote grouping/precedence only.
 *   **Blocks**: Defined by indentation or explicit braces `{}` (imperative context only).
+
+## 5. Trait System & Bounded Quantification
+
+F-Lang uses a rigorous syntax derived from standard Type Theory for defining and implementing traits.
+
+### 5.1 Trait Definition (Inheritance)
+Traits form a hierarchy. We use the colon `:` (similar to Rust) to define "Supertrait" requirements. This creates a lower bound on the type.
+
+**Syntax:** `trait Name Param : SuperTrait where ...`
+
+```haskell
+-- To be 'Ord'erable, a type must first be 'Eq'utable.
+trait Ord a : Eq a where
+    (<) : a -> a -> Bool
+    ...
+```
+
+### 5.2 Implementation (Context)
+When implementing a trait, we often need to constrain the generic type parameters. We use the `given` keyword to introduce this context, and the `<:` (Subtype) operator to express the constraint.
+
+**Syntax:** `impl Trait(Type) given Context where ...`
+
+*   `given`: Introduces the logical context ($\Gamma \vdash \dots$).
+*   `<:`: "Is a subtype of" / "Implements".
+
+```haskell
+-- Implement Equality for a List of 'a', GIVEN that 'a' itself implements Equality.
+impl Eq(List a) given a <: Eq where
+    (==) list1 list2 | ...
+```
+
+This notation aligns with the set-theoretic view: `a <: Eq` means the type `a` is a member of the set defined by trait `Eq`.

@@ -67,7 +67,7 @@ let putStr     : String -> IO Unit -- Native primPutStr
 let putLine    : String -> IO Unit -- Native primPutLine
 let getLine    : IO String         -- Native primGetLine
 let getChar    : IO Char           -- Native primGetChar
-let print      : Show a => a -> IO Unit
+let print      : (a -> IO Unit) given a <: Show
 let print x = putLine (show x)
 
 -- | File I/O
@@ -117,7 +117,7 @@ trait Eq a where
     infix let (==) = equals
     infix let (!=) x y = not (equals x y)
 
-trait Ord a where Eq a
+trait Ord a : Eq a where
     compare : a -> a -> Ordering
     infix let (<) x y  = (compare x y) == LT
     infix let (<=) x y = (compare x y) != GT
@@ -139,7 +139,7 @@ trait Num a where
     infix let (-) = minus
     infix let (*) = times
 
-trait Integral a where Num a, Ord a
+trait Integral a : Num a, Ord a
     quot : a -> a -> a
     rem  : a -> a -> a
     div  : a -> a -> a
@@ -147,13 +147,13 @@ trait Integral a where Num a, Ord a
     toInteger : a -> Int
     infix let (%) = mod
 
-trait Fractional a where Num a
+trait Fractional a : Num a
     divide : a -> a -> a
     recip  : a -> a
     fromRational : Double -> a
     infix let (/) = divide
 
-trait Floating a where Fractional a
+trait Floating a : Fractional a
     pi   : a
     exp  : a -> a
     log  : a -> a
@@ -171,17 +171,17 @@ trait Show a where show : a -> String
 trait Functor f where
     map : (a -> b) -> f a -> f b
 
-trait Applicative f where Functor f
+trait Applicative f : Functor f where
     pure  : a -> f a
     apply : f (a -> b) -> f a -> f b
     infix let (<*>) = apply
 
-trait Monad m where Applicative m
+trait Monad m : Applicative m where
     bind : m a -> (a -> m b) -> m b
     infix let (>>=) = bind
     infix let (>>) m1 m2 = bind m1 (\_ -> m2)
 
-trait Alternative f where Applicative f
+trait Alternative f : Applicative f where
     empty : f a
     alt   : f a -> f a -> f a
     infix let (<|>) = alt
@@ -246,10 +246,10 @@ let sequence list
 let mapM f list = sequence (map f list)
 let mapM_ f list | Nil -> pure Unit | Cons (x, xs) -> f x >> mapM_ f xs
 
-impl Show(List a) given Show(a) where
+impl Show(List a) given a <: Show where
     show list = "[" ++ (intercalate ", " (map show list)) ++ "]"
 
-impl Eq(List a) given Eq(a) where
+impl Eq(List a) given a <: Eq where
     equals l1 l2
         | Nil, Nil -> True
         | Cons (x, xs), Cons (y, ys) -> (x == y) && (equals xs ys)
