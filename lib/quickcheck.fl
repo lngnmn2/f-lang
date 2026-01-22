@@ -1,0 +1,152 @@
+module QuickCheck where
+
+import Prelude
+
+-- ============================================================================
+-- Random Number Generation (Simple LCG)
+-- ============================================================================
+
+type Seed | Seed Int
+
+-- LCG Constants (m = 2^31 - 1)
+let lcgM = 2147483647
+let lcgA = 48271
+
+let nextSeed s | Seed x ->
+    let x' = (x * lcgA) % lcgM
+    Seed x'
+
+let nextInt s | Seed x ->
+    let s' = nextSeed s
+    let Seed val = s'
+    (val, s')
+
+-- ============================================================================
+-- The Gen Monad
+-- ============================================================================
+
+type Gen a | Gen (Seed -> (a, Seed))
+
+let runGen g s | Gen f -> f s
+
+impl Functor(Gen) where
+    map f g | Gen run ->
+        Gen (\s ->
+            let (x, s') = run s
+            (f x, s')
+        )
+
+impl Applicative(Gen) where
+    pure x = Gen (\s -> (x, s))
+    apply fg gx | Gen runF, Gen runX ->
+        Gen (\s ->
+            let (f, s1) = runF s
+            let (x, s2) = runX s1
+            (f x, s2)
+        )
+
+impl Monad(Gen) where
+    bind g k | Gen run ->
+        Gen (\s ->
+            let (x, s1) = run s
+            let Gen runK = k x
+            runK s1
+        )
+
+-- ============================================================================
+-- Generator Combinators
+-- ============================================================================
+
+let choose lo hi =
+    Gen (\s ->
+        let (val, s') = nextInt s
+        let valAbs = if val < 0 then negate val else val
+        let range = hi - lo + 1
+        let offset = valAbs % range
+        (lo + offset, s')
+    )
+
+let oneOf genList =
+    bind (choose 0 (length genList - 1)) \idx ->
+    let pick n xs
+        | Nil -> error "oneOf: empty list"
+        | Cons (g, gs) -> if n == 0 then g else pick (n - 1) gs
+    pick idx genList
+
+let listOf gen =
+    bind (choose 0 10) \len ->
+    let go n
+        | n == 0 -> pure Nil
+        | _ -> 
+            bind gen \x ->
+            bind (go (n - 1)) \xs ->
+            pure (Cons (x, xs))
+    go len
+
+-- ============================================================================
+-- Arbitrary Trait
+-- ============================================================================
+
+trait Arbitrary a where
+    arbitrary : Gen a
+
+impl Arbitrary(Int) where
+    arbitrary = choose (-1000) 1000
+
+impl Arbitrary(Bool) where
+    arbitrary = map (\x -> x == 1) (choose 0 1)
+
+impl Arbitrary(List a) given Arbitrary(a) where
+    arbitrary = listOf arbitrary
+
+-- ============================================================================
+-- Properties and Runner
+-- ============================================================================
+
+type TestResult 
+    | Passed 
+    | Failed String
+
+type Property | Property (Gen TestResult)
+
+-- | Check a boolean property (no shrinking, no counterexample printing)
+let propBool b = 
+    Property (pure (if b then Passed else Failed "Boolean assertion failed"))
+
+-- | Check a property for all generated values
+let forAll gen func =
+    Property (
+        bind gen \x ->
+        let res = func x
+        pure (if res then Passed else Failed ("Counterexample: " ++ show x))
+    )
+
+let forAll2 genA genB func =
+    Property (
+        bind genA \a ->
+        bind genB \b ->
+        let res = func a b
+        pure (if res then Passed else Failed ("Counterexample: " ++ show a ++ ", " ++ show b))
+    )
+
+let forAll3 genA genB genC func =
+    Property (
+        bind genA \a ->
+        bind genB \b ->
+        bind genC \c ->
+        let res = func a b c
+        pure (if res then Passed else Failed ("Counterexample: " ++ show a ++ ", " ++ show b ++ ", " ++ show c))
+    )
+
+let quickCheck n prop | Property gen ->
+    let checkRes res i s
+        | Passed -> loop (i - 1) s
+        | Failed msg -> putLine ("*** Failed! " ++ msg)
+
+    let loop i s
+        | i == 0 -> putLine ("+++ OK, passed " ++ show n ++ " tests.")
+        | _ ->
+            let (res, s') = runGen gen s
+            checkRes res i s'
+
+    loop n (Seed 12345)
