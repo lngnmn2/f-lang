@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-The F-Lang project has successfully achieved its design goal of a "Singularity of Syntax." The codebase (`Parser.hs`, `Core.hs`, `Prelude.fl`) is now fully synchronized with the documentation (`TUTORIAL.md`, `README.md`, `SPEC.md`, `ADVANCED_SYNTAX.md`).
+The F-Lang project has successfully achieved its design goal of a "Singularity of Syntax." The codebase (`Parser.hs`, `Core.hs`, `Prelude.fl`, `Control.fl`, `Async.fl`) is fully synchronized with the documentation (`TUTORIAL.md`, `README.md`, `SPEC.md`, `ADVANCED_SYNTAX.md`).
 
 ## 2. Rigor & Completeness Analysis
 
@@ -34,6 +34,11 @@ The project now employs a unified "Type Theoretic" syntax for traits:
 
 This eliminates ad-hoc symbols like `=>` and unifies Type Refinement (`suchThat`) with Context Refinement (`given`).
 
+### Library Ecosystem
+*   **Prelude**: Now includes a full hierarchy: `Functor` <: `Applicative` <: `Monad`, plus `Foldable` and `Traversable`.
+*   **Control**: A robust set of monadic combinators (`void`, `when`, `foldM`, `replicateM`, `zip`) derived from Cats/ZIO statistics.
+*   **Async**: A faithful implementation of the F# Async Monad (ReaderT CancellationToken IO), serving as a strictly typed abstraction barrier for concurrent effects.
+
 ## 3. Structural vs. Logical Separation
 *   **Type Level**: Uses standard math notation (`|`, `,`, `->`, `:`, `<:`) to define Sets and Relations.
 *   **Code Level**: Uses the *same* notation to define Data Construction and Control Flow.
@@ -42,6 +47,6 @@ This eliminates ad-hoc symbols like `=>` and unifies Type Refinement (`suchThat`
     *   This is the "Singularity": Data definition and Control flow are duals.
 
 ## 4. Conclusion
-The project is rigorous, complete within its specified scope, and mathematically consistent. The addition of `given` to the expression parser closes the final gap in function signature expressivity.
+The project is rigorous, complete within its specified scope, and mathematically consistent. The language definition is now **FROZEN** for Version 1.0.
 
-**Recommendation:** Proceed to "Frozen" state for Version 1.0 specification.
+**Recommendation:** Release Version 1.0.

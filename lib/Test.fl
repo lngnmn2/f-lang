@@ -1,0 +1,77 @@
+mod Test where
+
+import Prelude
+
+-- | The Trinity of Test Outcomes
+-- Every test must result in either a Pass or a Fail with a reason.
+type TestResult =
+    | Passed
+    | Failed String
+
+-- | The Test Tree (Recursive structure inspired by Tasty)
+-- Allows for hierarchical grouping of tests to maintain clean structure.
+type TestTree =
+    | TestCase String TestResult
+    | TestGroup String (List TestTree)
+
+-- | Core Assertions
+-- Pure functions that evaluate conditions and return TestResult.
+
+let assert condition msg =
+    condition
+        | True  -> Passed
+        | False -> Failed msg
+
+-- | The "Should" DSL
+-- Mimics ScalaTest's readable assertions using type-driven design.
+trait Should a where
+    shouldBe : a -> a -> TestResult
+    shouldNotBe : a -> a -> TestResult
+
+impl Should(a) given a <: Eq a where
+    shouldBe actual expected =
+        (equals actual expected)
+            | True  -> Passed
+            | False -> Failed "Assertion failed: values are not equal"
+
+    shouldNotBe actual expected =
+        (equals actual expected)
+            | True  -> Failed "Assertion failed: values are equal"
+            | False -> Passed
+
+-- | Declarative Builders
+-- High-level functions to construct the test tree in a readable way.
+
+let it name result = TestCase name result
+
+let describe name tests = TestGroup name tests
+
+-- | Test Runner & Summary logic
+-- Aggregates the results of a TestTree into a final report.
+
+type Summary = (Int, Int, Int, List (String, String)) -- (Total, Passed, Failed, Errors)
+
+let emptySummary = (0, 0, 0, Nil)
+
+let combine s1 s2 =
+    match (s1, s2)
+    | ((t1, p1, f1, e1), (t2, p2, f2, e2)) ->
+        (plus t1 t2, plus p1 p2, plus f1 f2, append e1 e2)
+
+let run =
+    | TestCase name Passed -> (1, 1, 0, Nil)
+    | TestCase name (Failed msg) -> (1, 0, 1, Cons ((name, msg), Nil))
+    | TestGroup _ tests ->
+        foldl (\acc t -> combine acc (run t)) emptySummary tests
+
+-- | Example of a declarative test suite
+{-
+let mathTests = 
+    describe "Basic Math" (
+        Cons (it "adds correctly" (shouldBe (plus 2 2) 4),
+        Cons (it "checks inequality" (shouldNotBe (plus 2 2) 5),
+        Nil))
+    )
+
+let summary = run mathTests
+-}

@@ -1,0 +1,45 @@
+-- Example evaluation of Advanced Syntax for F-lang
+
+-- 1. Extension Methods and Infix for Testing DSL
+extension (q: Quantity) {
+    infix def shouldBe(expected: Quantity) : Result(Unit) =
+        if q == expected then Ok(())
+        else Err(LogicError("Quantity mismatch"))
+}
+
+-- 2. List Comprehensions with Patterns and Guards
+-- Story: Filter high-value Buy orders from a stream
+def getHighValueBuys(orders: List(Order), threshold: Price) =
+    [ o | o@Order(Buy, p, q) <- orders, 
+          let total = p * q,
+          total > threshold ]
+
+-- 3. Contextual Parameters for the Infrastructure Layer
+-- Modeling the "Imperative Shell" providing credentials
+def executeTrade(order: Order(Signed))(using env: BinanceEnv) =
+    env.client.submit(order)
+
+-- 4. Macros for Boilerplate Reduction
+-- Using reversed Lisp syntax: ' for quote, ` for unquote
+macro log_step(name, body) =
+    '(do 
+        print("Starting step: " + `name)
+        let result = `body
+        print("Finished step: " + `name)
+        result
+    )
+
+-- 5. Putting it all together
+def main() =
+    let orders = [Order(Buy, 100.0, 2.0), Order(Sell, 50.0, 1.0), Order(Buy, 10.0, 0.5)]
+    
+    -- Using the comprehension
+    let highValue = getHighValueBuys(orders, 150.0)
+    
+    -- Using infix and extension
+    highValue.length `shouldBe` 1
+    
+    -- Using the macro
+    log_step("Execution", 
+        [ executeTrade(sign(o)) | o <- highValue ]
+    )

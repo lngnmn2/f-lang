@@ -1,0 +1,17 @@
+module ControlSpec where
+import Prelude
+import Control
+import FSpec
+
+let spec = runSpec "Control Combinators" [
+    -- void
+    (void (Just 1)) `shouldBe` Just Unit,
+    (void Nothing) `shouldBe` Nothing,
+
+    -- liftA2
+    (liftA2 plus (Just 1) (Just 2)) `shouldBe` Just 3,
+    (liftA2 plus (Just 1) Nothing) `shouldBe` Nothing,
+
+    -- zip
+    (zip (Just 1) (Just 2)) `shouldBe` Just (1, 2)
+]

@@ -1,0 +1,28 @@
+module MatchSpec where
+import Prelude
+import FSpec
+
+type Shape
+    | Circle Double
+    | Rect Double, Double
+
+let area s
+    | Circle r -> 3.14 * r * r
+    | Rect w, h -> w * h
+
+let spec = runSpec "Pattern Matching" [
+    (area (Circle 2.0)) `shouldBe` 12.56,
+    (area (Rect 4.0 5.0)) `shouldBe` 20.0,
+
+    -- Nested Matching
+    let isJustZero m
+        | Just 0 -> True
+        | _ -> False
+    (isJustZero (Just 0)) `shouldBe` True,
+    (isJustZero (Just 1)) `shouldBe` False,
+    (isJustZero Nothing) `shouldBe` False,
+
+    -- Tuple Matching
+    let swap pair | (a, b) -> (b, a)
+    (swap (1, 2)) `shouldBe` (2, 1)
+]

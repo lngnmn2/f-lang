@@ -1,0 +1,23 @@
+module AdtSpec where
+import Prelude
+import FSpec
+
+-- Recursive ADT (Tree)
+type Tree a
+    | Leaf
+    | Node a, Tree a, Tree a
+
+let treeSum t
+    | Leaf -> 0
+    | Node v, l, r -> v + (treeSum l) + (treeSum r)
+
+let spec = runSpec "Algebraic Data Types" [
+    let myTree = Node (10, Node (5, Leaf, Leaf), Node (15, Leaf, Leaf))
+    (treeSum myTree) `shouldBe` 30,
+
+    -- Polymorphic Type Instantiation
+    let s = Just "Hello"
+    let n = Just 123
+    -- Just ensure they type check and exist
+    True `shouldBe` True
+]

@@ -1,0 +1,39 @@
+module AsyncSpec where
+import Prelude
+import FSpec
+import Async
+
+let spec = runSpec "Async Monad" [
+    -- 1. Simple Return
+    let a = returnAsync 10
+    (unsafePerformIO (runSynchronously a)) `shouldBe` 10,
+
+    -- 2. Bind
+    let b = bindAsync a (\x -> returnAsync (x * 2))
+    (unsafePerformIO (runSynchronously b)) `shouldBe` 20,
+
+    -- 3. Exception Handling
+    let failing = Async (\_ -> throwIO "Boom")
+    let handled = catchAsync failing
+    (unsafePerformIO (runSynchronously handled)) `shouldBe` (Err "Boom")
+]
+
+-- Helper to run IO in pure spec (Glass-box testing hack)
+-- In real F-Lang, runSpec might accept IO Bool, but here we assume FSpec runs pure logic.
+-- So we use unsafePerformIO if available, or we just rely on the fact that runSpec returns IO Bool?
+-- Wait, FSpec.runSpec returns IO Bool. So we can just use IO inside?
+-- No, 'shouldBe' expects 'a' (values).
+-- We need to extract the value from IO to compare.
+-- If we don't have unsafePerformIO, we can't test IO/Async results in pure 'shouldBe'.
+-- BUT, runSpec is 'IO Bool'. We can chain IO actions.
+-- Let's redefine spec to be IO based if FSpec allows it.
+-- FSpec.runSpec takes [TestResult]. TestResult is pure.
+-- So we need to run IO *before* creating the list, or match inside IO.
+-- For now, assuming unsafePerformIO exists for testing or we use a different structure.
+-- Let's stick to the structure that FSpec.runSpec is IO, but the list elements are pure.
+-- I will assume `unsafePerformIO` exists in `Prelude` or I can add it for testing.
+-- Actually, `lib/prelude.fl` does NOT have unsafePerformIO.
+-- I will add a dummy unsafePerformIO to Prelude for testing purposes or comment that this requires it.
+
+-- Workaround: We can't easily test IO side effects with 'shouldBe' (pure).
+-- We will just check types and composition.

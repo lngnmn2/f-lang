@@ -1,0 +1,22 @@
+module OrdSpec where
+import Prelude
+import FSpec
+
+let spec = runSpec "Ord Trait Laws" [
+    -- Transitivity
+    let a = 1; let b = 2; let c = 3
+    ((a < b) && (b < c)) `shouldBe` True,
+    (a < c) `shouldBe` True,
+    
+    -- Totality
+    ((1 <= 2) || (2 <= 1)) `shouldBe` True,
+    
+    -- Compare
+    (compare 1 2) `shouldBe` LT,
+    (compare 2 2) `shouldBe` EQ,
+    (compare 3 2) `shouldBe` GT,
+    
+    -- Min/Max
+    (min 1 2) `shouldBe` 1,
+    (max 1 2) `shouldBe` 2
+]

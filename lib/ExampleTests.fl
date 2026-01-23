@@ -1,0 +1,43 @@
+mod ExampleTests where
+
+import Prelude
+import Test
+
+-- | A simple functional component to test
+-- Factorial is a classic example of recursive logic.
+let factorial =
+    | 0 -> 1
+    | n -> times n (factorial (minus n 1))
+
+-- | Factorial Test Suite
+-- Using a declarative style inspired by ScalaTest.
+let factorialSuite =
+    describe "Factorial Logic" (
+        Cons (it "should return 1 for 0!" (shouldBe (factorial 0) 1),
+        Cons (it "should return 120 for 5!" (shouldBe (factorial 5) 120),
+        Nil))
+    )
+
+-- | List Operations Test Suite
+let listSuite =
+    describe "List Operations" (
+        Cons (it "should reverse a simple list" (
+            shouldBe (reverse (Cons (1, Cons (2, Nil)))) (Cons (2, Cons (1, Nil)))
+        ),
+        Cons (it "should calculate the correct length" (
+            shouldBe (length (Cons (1, Cons (2, Cons (3, Nil))))) 3
+        ),
+        Nil))
+    )
+
+-- | Composite Suite
+-- Demonstrating how to compose small suites into a larger one.
+let allTests =
+    describe "Project Test Suite" (
+        Cons (factorialSuite,
+        Cons (listSuite,
+        Nil))
+    )
+
+-- | Run all tests and generate a Summary
+let main = run allTests

@@ -1,0 +1,23 @@
+module CurryingSpec where
+import Prelude
+import FSpec
+
+let add3 x y z = x + y + z
+
+let spec = runSpec "Currying & Partial App" [
+    -- 1. Full application
+    (add3 1 2 3) `shouldBe` 6,
+
+    -- 2. Partial application
+    let add1 = add3 1
+    let add1_2 = add1 2
+    (add1_2 3) `shouldBe` 6,
+
+    -- 3. Over-application (function returning function)
+    let makeAdder x = \y -> x + y
+    (makeAdder 10 20) `shouldBe` 30,
+
+    -- 4. Sections (if syntax supported, else manual)
+    -- (+ 1) is `plus 1`
+    (plus 1 2) `shouldBe` 3
+]

@@ -1,0 +1,24 @@
+module EqSpec where
+import Prelude
+import FSpec
+
+-- Property-based style checks (manual for now)
+let checkReflexivity x = (x == x) `shouldBe` True
+let checkSymmetry x y = (x == y) `shouldBe` (y == x)
+
+let spec = runSpec "Eq Trait Laws" [
+    -- Int
+    checkReflexivity 42,
+    checkSymmetry 10 20,
+    checkSymmetry 10 10,
+
+    -- String
+    checkReflexivity "hello",
+    checkSymmetry "a" "b",
+    
+    -- List (Recursive Eq)
+    checkReflexivity (Cons (1, Nil)),
+    checkSymmetry (Cons (1, Nil)) (Cons (2, Nil)),
+    (Cons (1, Nil) == Cons (1, Nil)) `shouldBe` True,
+    (Cons (1, Nil) == Cons (2, Nil)) `shouldBe` False
+]

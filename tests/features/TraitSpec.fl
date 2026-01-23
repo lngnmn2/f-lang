@@ -1,0 +1,21 @@
+module TraitSpec where
+import Prelude
+import FSpec
+
+trait Printable a
+    asString : a -> String
+
+impl Printable(Int) where
+    asString i = show i
+
+impl Printable(Bool) where
+    asString b | True -> "Yes" | False -> "No"
+
+let printIt : (a -> String) given a <: Printable
+let printIt x = asString x
+
+let spec = runSpec "Traits" [
+    (printIt 42) `shouldBe` "42",
+    (printIt True) `shouldBe` "Yes",
+    (printIt False) `shouldBe` "No"
+]

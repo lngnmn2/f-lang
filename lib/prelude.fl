@@ -186,6 +186,15 @@ trait Alternative f : Applicative f where
     alt   : f a -> f a -> f a
     infix let (<|>) = alt
 
+trait Foldable t where
+    foldr : (a -> b -> b) -> b -> t a -> b
+    foldl : (b -> a -> b) -> b -> t a -> b
+
+trait Traversable t : Functor t, Foldable t where
+    traverse : Applicative f => (a -> f b) -> t a -> f (t b)
+    sequenceA : Applicative f => t (f a) -> f (t a)
+    sequenceA t = traverse id t
+
 let guard cond
     | cond -> pure Unit
     | _    -> empty
@@ -223,13 +232,18 @@ impl Monad(Maybe) where
 impl Alternative(Maybe) where
     empty = Nothing
     alt m1 m2 | Just x -> Just x | Nothing -> m2
+impl Foldable(Maybe) where
+    foldr f z m | Just x -> f x z | Nothing -> z
+    foldl f z m | Just x -> f z x | Nothing -> z
+impl Traversable(Maybe) where
+    traverse f m | Just x -> map Just (f x) | Nothing -> pure Nothing
 
 -- List Implementation
 type List a | Nil | Cons (a, List a)
 let isEmpty | Nil -> True | _ -> False
 let head | Cons (x, _) -> Just x | Nil -> Nothing
 let length | Nil -> 0 | Cons (_, xs) -> 1 + (length xs)
-let foldl f acc | Nil -> acc | Cons (x, xs) -> foldl f (f acc x) xs
+let foldl_list f acc | Nil -> acc | Cons (x, xs) -> foldl_list f (f acc x) xs
 let reverse list = 
     let rev acc | Nil -> acc | Cons (x, xs) -> rev (Cons (x, acc)) xs
     rev Nil list
@@ -238,13 +252,6 @@ let intercalate sep list
     | Cons (x, xs) -> | Nil -> x | _ -> x ++ sep ++ (intercalate sep xs) xs
 let append xs ys | Nil -> ys | Cons (x, rest) -> Cons (x, append rest ys)
 infix let (++) = append
-
--- Monadic List Combinators
-let sequence list
-    | Nil -> pure Nil
-    | Cons (mx, mxs) -> mx >>= \x -> sequence mxs >>= \xs -> pure (Cons (x, xs))
-let mapM f list = sequence (map f list)
-let mapM_ f list | Nil -> pure Unit | Cons (x, xs) -> f x >> mapM_ f xs
 
 impl Show(List a) given a <: Show where
     show list = "[" ++ (intercalate ", " (map show list)) ++ "]"
@@ -265,6 +272,16 @@ impl Monad(List a) where
 impl Alternative(List a) where
     empty = Nil
     alt xs ys = append xs ys
+impl Foldable(List a) where
+    foldl = foldl_list
+    foldr f z | Nil -> z | Cons (x, xs) -> f x (foldr f z xs)
+impl Traversable(List a) where
+    traverse f | Nil -> pure Nil | Cons (x, xs) -> liftA2 (\h t -> Cons (h, t)) (f x) (traverse f xs)
+
+-- Monadic List Combinators (Generalized via Traversable)
+let sequence = sequenceA
+let mapM = traverse
+let mapM_ f t = sequenceA (map f t) >> pure Unit
 
 -- Native Type Instances
 impl Show(String) where show s = s

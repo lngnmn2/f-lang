@@ -1,0 +1,125 @@
+module Control where
+
+import Prelude
+
+-- ============================================================================ 
+-- 1. Functor & Applicative Combinators (Scala/Cats Favorites)
+-- ============================================================================
+
+-- | Discard the value, keeping the effect. (Scala: unit, Cats: void)
+let void : Functor f => f a -> f Unit
+let void fa = map (const Unit) fa
+
+-- | Replace the value of the functor. (Haskell: <$, Cats: as)
+let as : Functor f => f a -> b -> f b
+let as fa b = map (const b) fa
+infix let (<$) = as
+
+-- | Lift a binary function into the context. (Cats: mapN/map2)
+let liftA2 : Applicative f => (a -> b -> c) -> f a -> f b -> f c
+let liftA2 f fa fb = apply (map f fa) fb
+
+-- | Lift a ternary function. (Cats: map3)
+let liftA3 : Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+let liftA3 f fa fb fc = apply (liftA2 f fa fb) fc
+
+-- | Sequence actions, discarding the value of the second. (Haskell: <*)
+let skipRight : Applicative f => f a -> f b -> f a
+let skipRight fa fb = liftA2 const fa fb
+infix let (<*) = skipRight
+
+-- | Sequence actions, discarding the value of the first. (Haskell: *>)
+let skipLeft : Applicative f => f a -> f b -> f b
+let skipLeft fa fb = liftA2 (flip const) fa fb
+infix let (*>) = skipLeft
+
+-- | Zip two structures together. (ZIO/Cats: zip)
+let zip : Applicative f => f a -> f b -> f (a, b)
+let zip fa fb = liftA2 (\a b -> (a, b)) fa fb
+
+-- | Combine two structures with a function. (ZIO: zipWith)
+let zipWith : Applicative f => (a -> b -> c) -> f a -> f b -> f c
+let zipWith = liftA2
+
+-- ============================================================================ 
+-- 2. Monad Combinators
+-- ============================================================================
+
+-- | Flatten a nested monad. (Scala: flatten, Haskell: join)
+let join : Monad m => m (m a) -> m a
+let join mma = bind mma id
+
+-- | Execute an action repeatedly forever. (ZIO: forever)
+let forever : Monad m => m a -> m b
+let forever ma = ma >> forever ma
+
+-- | Execute an action based on a condition. (Cats: whenA)
+let when : Applicative f => Bool -> f Unit -> f Unit
+let when cond action
+    | cond -> action
+    | _    -> pure Unit
+
+-- | Execute an action unless a condition is met. (Cats: unlessA)
+let unless : Applicative f => Bool -> f Unit -> f Unit
+let unless cond action
+    | cond -> pure Unit
+    | _    -> action
+
+-- | Execute an action if the Maybe has a value.
+let whenJust : Applicative f => Maybe a -> (a -> f Unit) -> f Unit
+let whenJust mb f
+    | Just x -> f x
+    | Nothing -> pure Unit
+
+-- | Fold a structure within a monad. (Cats: foldM)
+let foldM : (Foldable t, Monad m) => (b -> a -> m b) -> b -> t a -> m b
+let foldM f z t = foldl (\macc y -> macc >>= \acc -> f acc y) (pure z) t
+
+-- | Perform an action n times, gathering results. (ZIO: replicate)
+let replicateM : Applicative f => Int -> f a -> f (List a)
+let replicateM n fa
+    | 0 -> pure Nil
+    | _ -> liftA2 (\x xs -> Cons (x, xs)) fa (replicateM (n - 1) fa)
+
+-- | Apply an action to each element (generic). (ZIO: foreach_)
+let foreach_ : (Foldable t, Monad m) => t a -> (a -> m b) -> m Unit
+let foreach_ t f = foldM (\_ x -> f x >> pure Unit) Unit t
+
+-- | Tap into the chain to perform a side effect, returning the original value. (ZIO: tap)
+let tap : Monad m => (a -> m b) -> m a -> m a
+let tap f ma = ma >>= \a -> (f a) >> pure a
+
+-- | Execute two actions, return the result of the first. (ZIO: tap but for effects that don't depend on value)
+let flatTap : Monad m => m b -> m a -> m a
+let flatTap mb ma = ma >>= \a -> mb >> pure a
+
+-- ============================================================================ 
+-- 3. Error Handling Combinators (Result/IO)
+-- ============================================================================
+
+-- | Try to execute an action, converting error to Either/Result. (Cats: attempt)
+-- Note: Requires MonadError trait which we simulate with Result for now.
+let attempt : Result a e -> Result (Result a e) Unit
+let attempt res | Ok v -> Ok (Ok v) | Err e -> Ok (Err e)
+
+-- | Handle an error with a function. (Cats: handleErrorWith, ZIO: catchAll)
+let catchAll : (e -> Result a e2) -> Result a e -> Result a e2
+let catchAll handler res
+    | Ok v -> Ok v
+    | Err e -> handler e
+
+-- | Map over the error channel. (ZIO: mapError)
+let mapError : (e -> e2) -> Result a e -> Result a e2
+let mapError f res
+    | Ok v -> Ok v
+    | Err e -> Err (f e)
+
+-- | Resource management pattern. (Cats: bracket, ZIO: acquireRelease)
+-- Since we don't have true Exception handling in general Monad, we implement for IO specifically
+-- assuming a 'finally' primitive or using the existing catch.
+
+let bracket : IO a -> (a -> IO b) -> (a -> IO c) -> IO c
+let bracket acquire release use = 
+    acquire >>= \res ->
+        catch (use res >>= \out -> release res >> returnIO out)
+              (\err -> release res >> throwIO err)

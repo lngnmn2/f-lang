@@ -1,0 +1,126 @@
+module Async where
+
+import Prelude
+import Control
+
+-- ============================================================================ 
+-- F# Style Async Monad
+-- ============================================================================ 
+
+-- A CancellationToken is a mutable boolean reference.
+type CancellationToken = IORef Bool
+
+let newCancellationToken : IO CancellationToken
+let newCancellationToken = newIORef False
+
+let cancel : CancellationToken -> IO Unit
+let cancel token = writeIORef token True
+
+-- | The Async Type: A computation that accepts a CancellationToken and returns an IO action.
+type Async a | Async (CancellationToken -> IO a)
+
+-- ============================================================================ 
+-- 1. Monad Instances
+-- ============================================================================ 
+
+let returnAsync x = Async (\_ -> returnIO x)
+
+let bindAsync (Async f) g = Async (\token ->
+    -- Check cancellation before binding
+    readIORef token >>= \cancelled ->
+        | cancelled -> throwIO "Operation Cancelled"
+        | False -> 
+            bindIO (f token) (\x -> 
+                let (Async next) = g x
+                next token
+            )
+)
+
+impl Functor(Async) where
+    map f (Async action) = Async (\token -> map f (action token))
+
+impl Applicative(Async) where
+    pure = returnAsync
+    apply (Async f_op) (Async x_op) = Async (\token ->
+        apply (f_op token) (x_op token)
+    )
+
+impl Monad(Async) where
+    bind = bindAsync
+
+-- ============================================================================ 
+-- 2. Combinators (F# API Mirror)
+-- ============================================================================ 
+
+-- | Execute the async computation synchronously.
+let runSynchronously : Async a -> IO a
+let runSynchronously (Async action) = 
+    newCancellationToken >>= \token -> action token
+
+-- | Start the async computation. (Conceptually in background)
+let start : Async Unit -> IO Unit
+let start (Async action) = 
+    newCancellationToken >>= \token -> 
+        void (action token)
+
+-- | Ignore the result of an Async computation.
+let ignore : Async a -> Async Unit
+let ignore (Async action) = Async (\token -> void (action token))
+
+-- | Creates an async computation that sleeps for the given milliseconds.
+-- (Mock implementation relying on thread blocking or busy wait if no primitive)
+let sleep : Int -> Async Unit
+let sleep ms = Async (\_ -> 
+    putLine ("Sleeping for " ++ (show ms) ++ "ms") -- Mock
+)
+
+-- | Catches exceptions in the async block, returning a Result.
+let catchAsync : Async a -> Async (Result a String)
+let catchAsync (Async action) = Async (\token ->
+    catch (map Ok (action token))
+          (\err -> returnIO (Err err))
+)
+
+-- | Run a list of Async computations in parallel.
+-- Note: In this single-threaded reference implementation, this degrades to 'sequence' (serial).
+-- A real implementation would use 'forkIO' and 'MVars' to gather results.
+let parallel : List (Async a) -> Async (List a)
+let parallel list = sequence list
+
+-- | Run two Async computations in parallel.
+let parallel2 : Async a -> Async b -> Async (a, b)
+let parallel2 a b = liftA2 (\x y -> (x, y)) a b
+
+-- | Creates an async computation from an IO action.
+let fromIO : IO a -> Async a
+let fromIO io = Async (\_ -> io)
+
+-- | Check if cancellation has been requested.
+let onCancel : (Unit -> Unit) -> Async Unit
+let onCancel callback = Async (\token ->
+    readIORef token >>= \cancelled ->
+        | cancelled -> returnIO (callback Unit)
+        | False -> returnIO Unit
+)
+
+-- | Helper to lift a pure value (alias for return).
+let value : a -> Async a
+let value = returnAsync
+
+-- | Memoize an Async computation.
+-- Returns an IO action that produces a shared Async computation.
+-- The underlying computation runs only once.
+let memoize : Async a -> IO (Async a)
+let memoize (Async f) =
+    -- Create a ref to store the result (Promise-like)
+    newIORef Nothing >>= \ref ->
+    -- Return an Async that checks the ref
+    returnIO (Async (\token ->
+        readIORef ref >>= \mb ->
+        | Just v -> returnIO v
+        | Nothing -> 
+            -- Run the original action
+            f token >>= \v ->
+            writeIORef ref (Just v) >>
+            returnIO v
+    ))

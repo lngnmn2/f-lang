@@ -1,0 +1,44 @@
+module TestMain where
+
+import Prelude
+import FSpec
+
+-- Feature Specs
+import LazySpec
+import RecursionSpec
+import CurryingSpec
+import MatchSpec
+import ScopeSpec
+import AdtSpec
+import TraitSpec
+
+-- Lib Specs
+import PreludeSpec
+import ControlSpec
+
+-- Trait Specs
+import EqSpec
+import OrdSpec
+import FoldableSpec
+import TraversableSpec
+
+let main = 
+    putLine "=== F-Lang Verification Suite ===" >>
+    
+    LazySpec.spec >>
+    RecursionSpec.spec >>
+    CurryingSpec.spec >>
+    MatchSpec.spec >>
+    ScopeSpec.spec >>
+    AdtSpec.spec >>
+    TraitSpec.spec >>
+    
+    PreludeSpec.spec >>
+    ControlSpec.spec >>
+
+    EqSpec.spec >>
+    OrdSpec.spec >>
+    FoldableSpec.spec >>
+    TraversableSpec.spec >>
+    
+    putLine "=== Suite Complete ==="

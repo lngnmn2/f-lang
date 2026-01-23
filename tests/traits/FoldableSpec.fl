@@ -1,0 +1,27 @@
+module FoldableSpec where
+import Prelude
+import FSpec
+
+let spec = runSpec "Foldable Trait" [
+    -- List Fold
+    let list = Cons (1, Cons (2, Cons (3, Nil)))
+    
+    -- foldl (left associative)
+    -- ((0 + 1) + 2) + 3 = 6
+    (foldl (+) 0 list) `shouldBe` 6,
+    
+    -- foldr (right associative)
+    -- 1 + (2 + (3 + 0)) = 6
+    (foldr (+) 0 list) `shouldBe` 6,
+    
+    -- Order verification using subtraction
+    -- foldl: ((0 - 1) - 2) - 3 = -6
+    (foldl (-) 0 list) `shouldBe` -6,
+    
+    -- foldr: 1 - (2 - (3 - 0)) = 1 - (2 - 3) = 1 - (-1) = 2
+    (foldr (-) 0 list) `shouldBe` 2,
+    
+    -- Maybe Fold
+    (foldl (+) 10 (Just 5)) `shouldBe` 15,
+    (foldl (+) 10 Nothing) `shouldBe` 10
+]

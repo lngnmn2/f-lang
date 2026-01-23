@@ -1,0 +1,25 @@
+module LazySpec where
+import Prelude
+import FSpec
+
+let spec = runSpec "Lazy Evaluation" [
+    -- 1. Basic Laziness: 'undefined' should not trigger if unused
+    (const 1 undefined) `shouldBe` 1,
+    
+    -- 2. Short-circuiting Boolean Logic
+    (True || undefined) `shouldBe` True,
+    (False && undefined) `shouldBe` False,
+
+    -- 3. Lazy Lists (Infinite Stream with letrec)
+    -- Note: Assuming the VM handles letrec for data structures (thunks)
+    let ones = Cons (1, ones)
+    (head ones) `shouldBe` Just 1,
+    
+    -- Take 3 from infinite list
+    let take n list
+        | 0, _ -> Nil
+        | _, Nil -> Nil
+        | _, Cons(x, xs) -> Cons(x, take (n-1) xs)
+    
+    (take 3 ones) `shouldBe` Cons(1, Cons(1, Cons(1, Nil)))
+]

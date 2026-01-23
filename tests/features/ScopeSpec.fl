@@ -1,0 +1,28 @@
+module ScopeSpec where
+import Prelude
+import FSpec
+
+let makeCounter start =
+    let count = start
+    \inc -> count + inc
+
+let spec = runSpec "Lexical Scoping" [
+    -- Closure capture
+    let c1 = makeCounter 10
+    let c2 = makeCounter 20
+    (c1 1) `shouldBe` 11,
+    (c2 1) `shouldBe` 21,
+    
+    -- Shadowing
+    let x = 10
+    (let x = 20; x) `shouldBe` 20,
+    x `shouldBe` 10,
+
+    -- Capture in deeply nested scope
+    let f x = 
+        let g y = 
+            let h z = x + y + z
+            h
+        g
+    (((f 1) 2) 3) `shouldBe` 6
+]

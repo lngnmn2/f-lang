@@ -1,0 +1,20 @@
+module TraversableSpec where
+import Prelude
+import FSpec
+
+let spec = runSpec "Traversable Trait" [
+    -- Sequence List of Maybe
+    let l1 = Cons (Just 1, Cons (Just 2, Nil))
+    (sequence l1) `shouldBe` Just (Cons (1, Cons (2, Nil))),
+    
+    let l2 = Cons (Just 1, Cons (Nothing, Nil))
+    (sequence l2) `shouldBe` Nothing,
+    
+    -- Traverse (map + sequence)
+    let list = Cons (1, Cons (2, Nil))
+    let f x | x > 0 -> Just x | _ -> Nothing
+    (traverse f list) `shouldBe` Just list,
+    
+    let listBad = Cons (1, Cons (-1, Nil))
+    (traverse f listBad) `shouldBe` Nothing
+]

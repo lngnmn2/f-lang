@@ -1,0 +1,78 @@
+module PreludeSpec where
+
+import Prelude
+import FSpec
+
+let spec = 
+    putLine "Running Standard Library Verification..." >>
+    
+    -- 1. Ord and Logic Verification
+    runSpec "Ord Logic" [
+        (1 < 2) `shouldBe` True,
+        (2 >= 2) `shouldBe` True,
+        max 10 20 `shouldBe` 20,
+        min 10 20 `shouldBe` 10,
+        max 3.14 3.15 `shouldBe` 3.15
+    ] >>
+
+    -- 2. Integer Arithmetic (Integral)
+    runSpec "Integer Math" [
+        (1 + 1) `shouldBe` 2,
+        (10 * 10) `shouldBe` 100,
+        (5 - 10) `shouldBe` -5,
+        (10 `div` 3) `shouldBe` 3,
+        (10 % 3) `shouldBe` 1,
+        abs -5 `shouldBe` 5,
+        check `(100 > 99)
+    ] >>
+    
+    -- 3. Double Arithmetic (Floating)
+    runSpec "Double Math" [
+        (1.0 + 1.5) `shouldBe` 2.5,
+        (10.0 / 4.0) `shouldBe` 2.5,
+        abs -3.14 `shouldBe` 3.14,
+        check `(pi > 3.14)
+    ] >>
+    
+    -- 4. Char & String Logic
+    runSpec "Char & String" [
+        (length "abc") `shouldBe` 3,
+        ('a' == 'a') `shouldBe` True,
+        ('a' < 'b') `shouldBe` True
+    ] >>
+    
+    -- 5. List Operations & Comprehensions
+    runSpec "List & Comprehensions" [
+        length Nil `shouldBe` 0,
+        length (Cons (1, Cons (2, Nil))) `shouldBe` 2,
+        
+        -- Test Comprehension with Guard (Alternative trait)
+        (let list = Cons (1, Cons (2, Cons (3, Nil)))
+         [ x * 2 | x <- list, guard (x > 1) ]) 
+         `shouldBe` Cons (4, Cons (6, Nil)),
+
+        -- Test Comprehension with Local Binding
+        (let list = Cons (10, Nil)
+         [ y | x <- list, let y = x + 1 ]) 
+         `shouldBe` Cons (11, Nil)
+    ] >>
+    
+    -- 6. Maybe Logic (Alternative)
+    runSpec "Maybe Logic" [
+        Maybe.map (\x -> x + 1) (Just 1) `shouldBe` Just 2,
+        Maybe.map (\x -> x + 1) Nothing  `shouldBe` Nothing,
+        
+        -- Rust aliases
+        Some 1 `shouldBe` Just 1,
+        None `shouldBe` Nothing,
+
+        -- Test Guard in Maybe
+        (Just 5 >>= \x -> guard (x > 0) >> pure x) `shouldBe` Just 5,
+        (Just 5 >>= \x -> guard (x < 0) >> pure x) `shouldBe` Nothing
+    ] >>
+
+    -- 7. Monadic Laws for Result
+    runSpec "Result Monad Laws" [
+        (bind (pure 1) (\x -> Ok (x + 1))) `shouldBe` (Ok 2),
+        (bind (Ok 5) pure) `shouldBe` (Ok 5)
+    ]

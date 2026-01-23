@@ -1,0 +1,19 @@
+module RecursionSpec where
+import Prelude
+import FSpec
+
+let spec = runSpec "Recursion & TCO" [
+    -- 1. Tail Recursive Sum (Should not stack overflow)
+    let sum n acc | 0 -> acc | _ -> sum (n - 1) (acc + n)
+    (sum 1000 0) `shouldBe` 500500,
+
+    -- 2. Mutual Recursion
+    -- (Assuming top-level lets are mutually recursive or sequential scope allows it if defined correctly)
+    -- In F-Lang, let bindings are recursive.
+    let isEven n | 0 -> True | _ -> isOdd (n - 1)
+    let isOdd n  | 0 -> False | _ -> isEven (n - 1)
+    
+    (isEven 10) `shouldBe` True,
+    (isOdd 10) `shouldBe` False,
+    (isEven 11) `shouldBe` False
+]
